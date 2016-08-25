@@ -37,7 +37,7 @@ public class TaxCalculatorService {
 	private Money round(Money money) {
 		BigDecimal amount = money.getAmount();
 		BigDecimal scale = BigDecimal.ONE.divide(precision);
-		BigDecimal roundedAmount = amount.multiply(scale).setScale(0, RoundingMode.HALF_UP).divide(scale);
+		BigDecimal roundedAmount = amount.multiply(scale).setScale(0, RoundingMode.UP).divide(scale);
 		return new Money(roundedAmount);
 	}
 
