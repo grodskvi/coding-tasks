@@ -50,7 +50,7 @@ public class TaxCalculatorService {
 			Rate taxRate = taxRateCalculator.calculateTaxRate(item);
 			totalTaxRate = totalTaxRate.sum(taxRate);
 		}
-		Money itemCost = item.getFaceValue();
+		Money itemCost = item.getTotalCost();
 		return itemCost.applyRate(totalTaxRate);
 	}
 

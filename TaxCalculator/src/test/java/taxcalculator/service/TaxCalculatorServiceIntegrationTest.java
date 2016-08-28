@@ -27,21 +27,21 @@ public class TaxCalculatorServiceIntegrationTest {
 	@Test
 	public void calculatesTaxAmountForGroupOfIems() {
 		Item book = anItem()
-				.withDescription("Book")
+				.withName("Book")
 				.withPrice("12.49")
 				.withQuantity(1)
 				.withCategory(ItemCategory.BOOK)
 				.build();
 		
 		Item chocolateBar = anItem()
-				.withDescription("Chocolate Bar")
+				.withName("Chocolate Bar")
 				.withPrice("0.85")
 				.withQuantity(1)
 				.withCategory(ItemCategory.FOOD)
 				.build();
 		
 		Item musicCD = anItem()
-				.withDescription("Music CD")
+				.withName("Music CD")
 				.withPrice("14.99")
 				.withQuantity(1)
 				.withCategory(ItemCategory.OTHER)
@@ -55,7 +55,7 @@ public class TaxCalculatorServiceIntegrationTest {
 	public void calculatesTaxAmountForGroupOfImportedIems() {
 		
 		Item chocolate = anItem()
-				.withDescription("Box of Chocolates")
+				.withName("Box of Chocolates")
 				.withPrice("10")
 				.withQuantity(1)
 				.withCategory(ItemCategory.FOOD)
@@ -63,7 +63,7 @@ public class TaxCalculatorServiceIntegrationTest {
 				.build();
 		
 		Item perfume = anItem()
-				.withDescription("Perfume")
+				.withName("Perfume")
 				.withPrice("47.5")
 				.withQuantity(1)
 				.withCategory(ItemCategory.OTHER)
@@ -78,7 +78,7 @@ public class TaxCalculatorServiceIntegrationTest {
 	public void calculatesTaxAmountForGroupOfIemsWithSomeImported() {
 		
 		Item chocolate = anItem()
-				.withDescription("Box of Chocolates")
+				.withName("Box of Chocolates")
 				.withPrice("11.25")
 				.withQuantity(1)
 				.withCategory(ItemCategory.FOOD)
@@ -86,7 +86,7 @@ public class TaxCalculatorServiceIntegrationTest {
 				.build();
 		
 		Item importedPerfume = anItem()
-				.withDescription("Perfume")
+				.withName("Perfume")
 				.withPrice("27.99")
 				.withQuantity(1)
 				.withCategory(ItemCategory.OTHER)
@@ -94,14 +94,14 @@ public class TaxCalculatorServiceIntegrationTest {
 				.build();
 		
 		Item perfume = anItem()
-				.withDescription("Perfume")
+				.withName("Perfume")
 				.withPrice("18.99")
 				.withQuantity(1)
 				.withCategory(ItemCategory.OTHER)
 				.build();
 		
 		Item headachePills = anItem()
-				.withDescription("Headache Pills")
+				.withName("Headache Pills")
 				.withPrice("9.75")
 				.withQuantity(1)
 				.withCategory(ItemCategory.MEDICINE)

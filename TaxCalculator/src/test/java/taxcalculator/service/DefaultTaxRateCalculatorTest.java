@@ -58,21 +58,21 @@ public class DefaultTaxRateCalculatorTest {
 	
 	private Item aBook() {
 		return someItem()
-				.withDescription("Book")
+				.withName("Book")
 				.withCategory(ItemCategory.BOOK)
 				.build();
 	}
 	
 	private Item aFood() {
 		return someItem()
-				.withDescription("Food")
+				.withName("Food")
 				.withCategory(ItemCategory.FOOD)
 				.build();
 	}
 	
 	private Item aMedicine() {
 		return someItem()
-				.withDescription("Medicine")
+				.withName("Medicine")
 				.withCategory(ItemCategory.MEDICINE)
 				.build();
 	}

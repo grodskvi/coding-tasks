@@ -33,13 +33,13 @@ public class ItemTest {
 	}
 	
 	@Test
-	public void calculatesFaceValue() {
+	public void calculatesItemTotalCost() {
 		Item item = someItem()
 				.withPrice("10.3")
 				.withQuantity(3)
 				.build();
 		
-		assertThat(item.getFaceValue()).isEqualTo(money("30.9"));
+		assertThat(item.getTotalCost()).isEqualTo(money("30.9"));
 	}
 	
 	@Test
