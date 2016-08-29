@@ -2,11 +2,11 @@ package taxcalculator.domain;
 
 import static taxcalculator.utils.ParametersValidator.validateParameter;
 
-public class ItemQuantity {
+public class Quantity {
 	
 	private int quantity;
 
-	public ItemQuantity(int quantity) {
+	public Quantity(int quantity) {
 		validateParameter(quantity, i -> i >= 0, "Quantity can not be negative");
 		this.quantity = quantity;
 	}
@@ -33,7 +33,7 @@ public class ItemQuantity {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ItemQuantity other = (ItemQuantity) obj;
+		Quantity other = (Quantity) obj;
 		if (quantity != other.quantity)
 			return false;
 		return true;
@@ -44,7 +44,7 @@ public class ItemQuantity {
 		return "ItemQuantity [quantity=" + quantity + "]";
 	}
 
-	public static ItemQuantity quantity(int quantity) {
-		return new ItemQuantity(quantity);
+	public static Quantity quantity(int quantity) {
+		return new Quantity(quantity);
 	}
 }

@@ -14,7 +14,7 @@ import static taxcalculator.domain.ItemCategory.BOOK;
 import static taxcalculator.domain.ItemCategory.MEDICINE;
 import static taxcalculator.domain.ItemCategory.OTHER;
 import static taxcalculator.domain.ItemFeature.IMPORTED;
-import static taxcalculator.domain.ItemQuantity.quantity;
+import static taxcalculator.domain.Quantity.quantity;
 import static taxcalculator.domain.finance.Money.money;
 
 import java.math.BigDecimal;

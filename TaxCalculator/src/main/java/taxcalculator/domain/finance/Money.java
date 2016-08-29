@@ -4,11 +4,16 @@ import static taxcalculator.utils.ParametersValidator.NON_NEGATIVE_NUMBER;
 import static taxcalculator.utils.ParametersValidator.validateParameter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
+
+import taxcalculator.domain.Precision;
 
 import com.google.common.base.Preconditions;
 
 public class Money {
+	
+	private static final Precision DEFAULT_PRECISION = Precision.precision("0.01");
 	
 	public static final Money ZERO_AMOUNT = new Money(BigDecimal.ZERO);
 	
@@ -16,7 +21,13 @@ public class Money {
 
 	public Money(BigDecimal amount) {
 		validateParameter(amount, NON_NEGATIVE_NUMBER, "Can not create Money with negative amount");
-		this.amount = amount;
+		this.amount = round(amount, DEFAULT_PRECISION);
+	}
+	
+	public Money(Money money, Precision precision) {
+		Preconditions.checkNotNull(money, "Money parameter can not be null");
+		Preconditions.checkNotNull(precision, "Precision parameter can not be null");
+		amount = round(money.amount, precision);
 	}
 	
 	public BigDecimal getAmount() {
@@ -36,6 +47,12 @@ public class Money {
 	
 	public static Money money(String amount) {
 		return new Money(new BigDecimal(amount));
+	}
+	
+	private BigDecimal round(BigDecimal amount, Precision precision) {
+		BigDecimal scale = BigDecimal.ONE.divide(precision.getPrecision());
+		BigDecimal roundedAmount = amount.multiply(scale).setScale(0, RoundingMode.UP).divide(scale);
+		return roundedAmount;
 	}
 
 	@Override

@@ -14,14 +14,14 @@ public class Item {
 	
 	private String name;
 	private Money price;
-	private ItemQuantity quantity;
+	private Quantity quantity;
 	private ItemCategory category;
 	private Set<ItemFeature> features;
 	
 	private Money totalCost;
 	
 	
-	public Item(String name, Money price, ItemQuantity quantity, ItemCategory category,
+	public Item(String name, Money price, Quantity quantity, ItemCategory category,
 			Set<ItemFeature> features) {
 		Preconditions.checkNotNull(name, "Name should be set to create item");
 		Preconditions.checkNotNull(price, "Price should be set to create item");
@@ -48,7 +48,7 @@ public class Item {
 		return features.contains(ItemFeature.IMPORTED);
 	}
 	
-	private Money calculateTotalCost(Money price, ItemQuantity quantity) {
+	private Money calculateTotalCost(Money price, Quantity quantity) {
 		BigDecimal aPrice = price.getAmount();
 		BigDecimal aQuantity = BigDecimal.valueOf(quantity.getQuantity());
 		BigDecimal totalCost = aPrice.multiply(aQuantity);
@@ -67,7 +67,7 @@ public class Item {
 	public static class ItemBuilder {
 		private String name;
 		private Money price;
-		private ItemQuantity quantity = new ItemQuantity(1);
+		private Quantity quantity = new Quantity(1);
 		private ItemCategory category;
 		private Set<ItemFeature> features = new HashSet<ItemFeature>();
 		
@@ -83,12 +83,12 @@ public class Item {
 			this.price = money(price);
 			return this;
 		}
-		public ItemBuilder withQuantity(ItemQuantity quantity) {
+		public ItemBuilder withQuantity(Quantity quantity) {
 			this.quantity = quantity;
 			return this;
 		}
 		public ItemBuilder withQuantity(int quantity) {
-			this.quantity = new ItemQuantity(quantity);
+			this.quantity = new Quantity(quantity);
 			return this;
 		}
 		public ItemBuilder withCategory(ItemCategory category) {
