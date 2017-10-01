@@ -71,7 +71,7 @@ public class GameIntegrationTest {
 
             @Override
             public Tile nextMove() {
-                if(round > moves.length) {
+                if(round >= moves.length) {
                     throw new IllegalStateException("All moves are exceeded");
                 }
 

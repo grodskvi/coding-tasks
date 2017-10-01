@@ -23,7 +23,7 @@ public class Tile {
     public String getTileTextValue() {
         return tileValue
                 .map(String::valueOf)
-                .orElse(" ");
+                .orElse("");
     }
 
     public boolean isEmpty() {
