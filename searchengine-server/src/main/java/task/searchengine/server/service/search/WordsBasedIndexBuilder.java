@@ -14,9 +14,8 @@ public class WordsBasedIndexBuilder implements IndexBuilder {
     public IndexedDocument buildIndexFor(Document document) {
         String[] documentWords = document.getText().split("\\W+");
         Set<Token> tokens = asList(documentWords).stream()
-                .map(String::toLowerCase)
                 .filter(token -> !token.isEmpty())
-                .map(Token::new)
+                .map(Token::normalizedToken)
                 .collect(toSet());
         return new IndexedDocument(document.getDocumentKey(), tokens);
     }

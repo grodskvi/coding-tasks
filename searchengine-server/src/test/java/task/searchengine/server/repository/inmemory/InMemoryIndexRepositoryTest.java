@@ -5,6 +5,7 @@ import org.junit.Test;
 import task.searchengine.server.domain.DocumentKey;
 import task.searchengine.server.domain.IndexedDocument;
 import task.searchengine.server.domain.Token;
+import task.searchengine.utils.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static task.searchengine.server.repository.inmemory.InMemoryIndexRepository.restore;
+import static task.searchengine.utils.CollectionUtils.hashSet;
 
 public class InMemoryIndexRepositoryTest {
 
@@ -70,10 +72,6 @@ public class InMemoryIndexRepositoryTest {
 
         index.put(A_TOKEN, hashSet(DOCUMENT));
         return index;
-    }
-
-    private <T> Set<T> hashSet(T... elements) {
-        return new HashSet<>(asList(elements));
     }
 
 }

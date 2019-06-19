@@ -6,13 +6,13 @@ import static java.util.Collections.unmodifiableList;
 
 public class SearchQuery {
 
-    private final List<Token> tokens;
+    private final List<String> tokens;
 
-    public SearchQuery(List<Token> tokens) {
+    public SearchQuery(List<String> tokens) {
         this.tokens = unmodifiableList(tokens);
     }
 
-    public List<Token> getTokens() {
+    public List<String> getTokens() {
         return tokens;
     }
 

@@ -6,6 +6,9 @@ public class Token {
     private final String token;
 
     public Token(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Empty tokens are illegal");
+        }
         this.token = token;
     }
 
@@ -27,5 +30,9 @@ public class Token {
         return "Token{" +
                 "token='" + token + '\'' +
                 '}';
+    }
+
+    public static Token normalizedToken(String token) {
+        return new Token(token.toLowerCase());
     }
 }
