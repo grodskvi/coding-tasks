@@ -1,6 +1,8 @@
 package task.searchengine.server.service.document;
 
 import task.searchengine.server.domain.*;
+import task.searchengine.server.domain.exception.DocumentNotFoundException;
+import task.searchengine.server.domain.exception.DuplicateDocumentException;
 import task.searchengine.server.repository.DocumentRepository;
 import task.searchengine.server.service.search.SearchEngine;
 
@@ -19,7 +21,7 @@ public class DefaultDocumentService implements DocumentService {
     }
 
     @Override
-    public void addDocument(Document document) {
+    public void addDocument(Document document) throws DuplicateDocumentException {
         if (documentRepository.contains(document.getDocumentKey())) {
             //TODO: add logging
             String message = format("Document with key %s already exists", document.getDocumentKey());
@@ -30,8 +32,10 @@ public class DefaultDocumentService implements DocumentService {
     }
 
     @Override
-    public Document getDocument(DocumentKey documentKey) {
-        return documentRepository.findBy(documentKey);
+    public Document getDocument(DocumentKey documentKey) throws DocumentNotFoundException{
+        return documentRepository
+                .findBy(documentKey)
+                .orElseThrow(() -> new DocumentNotFoundException("Can not find document with key: " + documentKey.getKey()));
     }
 
     @Override

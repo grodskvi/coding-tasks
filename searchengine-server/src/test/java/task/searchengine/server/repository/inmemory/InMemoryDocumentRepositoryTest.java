@@ -6,6 +6,7 @@ import task.searchengine.server.domain.DocumentKey;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static task.searchengine.server.domain.Document.aDocumentWithKey;
@@ -32,14 +33,14 @@ public class InMemoryDocumentRepositoryTest {
         documentRepository = restore(prestoredDocuments());
         DocumentKey key = new DocumentKey("key");
         Document expectedDocument = new Document(key, "text");
-        assertThat(documentRepository.findBy(key)).isEqualTo(expectedDocument);
+        assertThat(documentRepository.findBy(key)).hasValue(expectedDocument);
     }
 
     @Test
     public void doesNotFindDocumentByMissingKey() {
         documentRepository = restore(prestoredDocuments());
         DocumentKey key = new DocumentKey("wrong key");
-        assertThat(documentRepository.findBy(key)).isNull();
+        assertThat(documentRepository.findBy(key)).isEmpty();
     }
 
     @Test
@@ -57,8 +58,8 @@ public class InMemoryDocumentRepositoryTest {
         documentRepository.save(document);
 
 
-        Document storedDocument = documentRepository.findBy(document.getDocumentKey());
-        assertThat(storedDocument).isEqualTo(document);
+        Optional<Document> storedDocument = documentRepository.findBy(document.getDocumentKey());
+        assertThat(storedDocument).hasValue(document);
     }
 
     @Test
@@ -68,8 +69,8 @@ public class InMemoryDocumentRepositoryTest {
         documentRepository.save(document);
 
 
-        Document storedDocument = documentRepository.findBy(document.getDocumentKey());
-        assertThat(storedDocument).isEqualTo(document);
+        Optional<Document> storedDocument = documentRepository.findBy(document.getDocumentKey());
+        assertThat(storedDocument).hasValue(document);
     }
 
 

@@ -6,6 +6,7 @@ import task.searchengine.server.repository.DocumentRepository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class InMemoryDocumentRepository implements DocumentRepository {
 
@@ -20,8 +21,8 @@ public class InMemoryDocumentRepository implements DocumentRepository {
     }
 
     @Override
-    public Document findBy(DocumentKey key) {
-        return documents.get(key);
+    public Optional<Document> findBy(DocumentKey key) {
+        return Optional.ofNullable(documents.get(key));
     }
 
     @Override

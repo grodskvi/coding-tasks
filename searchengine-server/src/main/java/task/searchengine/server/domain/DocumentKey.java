@@ -9,6 +9,10 @@ public class DocumentKey {
         this.key = key;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
