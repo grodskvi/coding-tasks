@@ -1,5 +1,6 @@
 package task.searchengine.server.repository.inmemory;
 
+import org.springframework.stereotype.Repository;
 import task.searchengine.server.domain.Document;
 import task.searchengine.server.domain.DocumentKey;
 import task.searchengine.server.repository.DocumentRepository;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 public class InMemoryDocumentRepository implements DocumentRepository {
 
     private final Map<DocumentKey, Document> documents;

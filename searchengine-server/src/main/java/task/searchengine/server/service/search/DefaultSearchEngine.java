@@ -1,5 +1,6 @@
 package task.searchengine.server.service.search;
 
+import org.springframework.stereotype.Service;
 import task.searchengine.server.domain.*;
 import task.searchengine.server.repository.IndexRepository;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static task.searchengine.server.domain.Token.normalizedToken;
 
+@Service
 public class DefaultSearchEngine implements SearchEngine {
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();

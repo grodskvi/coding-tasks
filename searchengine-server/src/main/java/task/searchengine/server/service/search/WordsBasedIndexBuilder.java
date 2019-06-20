@@ -1,5 +1,6 @@
 package task.searchengine.server.service.search;
 
+import org.springframework.stereotype.Component;
 import task.searchengine.server.domain.Document;
 import task.searchengine.server.domain.IndexedDocument;
 import task.searchengine.server.domain.Token;
@@ -9,6 +10,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
+@Component
 public class WordsBasedIndexBuilder implements IndexBuilder {
     @Override
     public IndexedDocument buildIndexFor(Document document) {

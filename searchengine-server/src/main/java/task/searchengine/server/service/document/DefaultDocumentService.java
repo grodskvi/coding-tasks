@@ -1,5 +1,6 @@
 package task.searchengine.server.service.document;
 
+import org.springframework.stereotype.Service;
 import task.searchengine.server.domain.*;
 import task.searchengine.server.domain.exception.DocumentNotFoundException;
 import task.searchengine.server.domain.exception.DuplicateDocumentException;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 
+@Service
 public class DefaultDocumentService implements DocumentService {
 
     private final DocumentRepository documentRepository;
@@ -21,7 +23,7 @@ public class DefaultDocumentService implements DocumentService {
     }
 
     @Override
-    public void addDocument(Document document) throws DuplicateDocumentException {
+    public DocumentKey addDocument(Document document) throws DuplicateDocumentException {
         if (documentRepository.contains(document.getDocumentKey())) {
             //TODO: add logging
             String message = format("Document with key %s already exists", document.getDocumentKey());
@@ -29,6 +31,7 @@ public class DefaultDocumentService implements DocumentService {
         }
         documentRepository.save(document);
         searchEngine.index(document);
+        return document.getDocumentKey();
     }
 
     @Override

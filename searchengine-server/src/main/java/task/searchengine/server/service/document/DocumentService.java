@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface DocumentService {
 
-    void addDocument(Document document) throws DocumentProcessingException;
+    DocumentKey addDocument(Document document) throws DocumentProcessingException;
 
     Document getDocument(DocumentKey documentKey) throws DocumentNotFoundException;
 

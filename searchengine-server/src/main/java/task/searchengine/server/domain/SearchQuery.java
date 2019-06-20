@@ -1,6 +1,7 @@
 package task.searchengine.server.domain;
 
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -14,6 +15,20 @@ public class SearchQuery {
 
     public List<String> getTokens() {
         return tokens;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchQuery that = (SearchQuery) o;
+        return Objects.equals(tokens, that.tokens);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tokens);
     }
 
     @Override
