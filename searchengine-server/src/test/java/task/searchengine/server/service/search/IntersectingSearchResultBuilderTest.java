@@ -4,6 +4,9 @@ import org.junit.Test;
 import task.searchengine.server.domain.DocumentKey;
 import task.searchengine.server.domain.Token;
 
+import java.util.Collections;
+
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static task.searchengine.utils.CollectionUtils.hashSet;
 
@@ -32,5 +35,21 @@ public class IntersectingSearchResultBuilderTest {
         resultBuilder.acceptSearchResult(new Token("b"), hashSet(KEY_A, KEY_C));
 
         assertThat(resultBuilder.getResult()).containsExactly(KEY_A);
+    }
+
+    @Test
+    public void resolvesEmptyTotalResultIfOneOfTokensAreEmpty() {
+        resultBuilder.acceptSearchResult(new Token("a"), emptySet());
+        resultBuilder.acceptSearchResult(new Token("b"), hashSet(KEY_A, KEY_C));
+
+        assertThat(resultBuilder.getResult()).isEmpty();
+    }
+
+    @Test
+    public void resolvesEmptyTotalResultIfLastfTokensIsEmpty() {
+        resultBuilder.acceptSearchResult(new Token("a"), hashSet(KEY_A, KEY_C));
+        resultBuilder.acceptSearchResult(new Token("b"), emptySet());
+
+        assertThat(resultBuilder.getResult()).isEmpty();
     }
 }

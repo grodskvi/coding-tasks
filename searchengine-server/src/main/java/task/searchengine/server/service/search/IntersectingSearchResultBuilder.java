@@ -12,11 +12,16 @@ import java.util.stream.Collectors;
 
 @Component
 public class IntersectingSearchResultBuilder implements SearchResultBuilder {
+
+    private boolean initialized = false;
     private List<DocumentKey> searchResult = new ArrayList<>();
 
     @Override
     public void acceptSearchResult(Token token, Set<DocumentKey> tokenDocuments) {
-        Consumer<Set<DocumentKey>> operation = searchResult.isEmpty()
+        if (tokenDocuments.isEmpty()) {
+            searchResult.clear();
+        }
+        Consumer<Set<DocumentKey>> operation = !initialized
                 ? this::initialize
                 : this::join;
 
@@ -30,6 +35,7 @@ public class IntersectingSearchResultBuilder implements SearchResultBuilder {
     }
 
     private void initialize(Set<DocumentKey> tokenDocuments) {
+        initialized = true;
         searchResult.addAll(tokenDocuments);
     }
 
