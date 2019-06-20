@@ -1,5 +1,6 @@
 package task.searchengine.client;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -18,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,7 +45,7 @@ public class SearchEngineClient {
         HttpResponse httpResponse = doHttpResponse(httpPost, "application/json");
 
         String response = EntityUtils.toString(httpResponse.getEntity());
-        if (httpResponse.getStatusLine().equals(200)) {
+        if (isSuccessful(httpResponse)) {
             DocumentKey document = objectMapper.readValue(response, DocumentKey.class);
             write("Added document with key: " + document.getKey());
         } else {
@@ -58,7 +60,7 @@ public class SearchEngineClient {
         HttpResponse httpResponse = doHttpResponse(httpGet, "application/json");
 
         String response = EntityUtils.toString(httpResponse.getEntity());
-        if (httpResponse.getStatusLine().equals(200)) {
+        if (isSuccessful(httpResponse)) {
             Document document = objectMapper.readValue(response, Document.class);
             write("Received document by key: " + document.getDocumentKey().getKey());
             write("Text: \n" + document.getText());
@@ -79,11 +81,13 @@ public class SearchEngineClient {
         HttpResponse httpResponse = doHttpResponse(httpGet, "application/json");
 
         String response = EntityUtils.toString(httpResponse.getEntity());
-        if (httpResponse.getStatusLine().getStatusCode() == 200) {
-            List documentKeys = objectMapper.readValue(response, List.class);
+        if (isSuccessful(httpResponse)) {
+            TypeReference<List<DocumentKey>> documentKeysType = new TypeReference<List<DocumentKey>>() {};
+            List<DocumentKey> documentKeys = objectMapper.readValue(response, documentKeysType);
             write("Found documents by keywords " + keywords + ": ");
 
-            String result = documentKeys.isEmpty() ? "No documents found" : String.join("\n", documentKeys);
+            List<String> keys = documentKeys.stream().map(DocumentKey::getKey).collect(toList());
+            String result = keys.isEmpty() ? "No documents found" : String.join("\n", keys);
             write(result);
         } else {
             ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
@@ -95,6 +99,10 @@ public class SearchEngineClient {
         httpMethod.addHeader("Content-Type", contentType);
         return httpClient.execute(httpMethod);
 
+    }
+
+    private boolean isSuccessful(HttpResponse httpResponse) {
+        return httpResponse.getStatusLine().getStatusCode() == 200;
     }
 
     private void write(String message) {

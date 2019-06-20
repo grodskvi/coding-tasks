@@ -17,7 +17,7 @@ public class ConsoleCommandDispatcher {
     }
 
     public void run() {
-        writer.println(searchEngineClient.getServerUrl());
+        writer.println("Connected to " + searchEngineClient.getServerUrl());
         printCommandSummary();
 
         Scanner scanner = new Scanner(System.in);
@@ -48,7 +48,7 @@ public class ConsoleCommandDispatcher {
                 break;
             case "search":
                 List<String> keywords = new ArrayList();
-                for (int i = 0; i < parsedCommand.length; i++) {
+                for (int i = 1; i < parsedCommand.length; i++) {
                     keywords.add(parsedCommand[i]);
                 }
                 searchEngineClient.searchDocuments(keywords);
