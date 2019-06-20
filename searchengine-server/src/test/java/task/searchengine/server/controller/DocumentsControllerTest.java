@@ -107,7 +107,7 @@ public class DocumentsControllerTest {
         List<DocumentKey> matchedDocuments = asList(new DocumentKey("key1"), new DocumentKey("key2"));
         when(documentService.search(searchQuery)).thenReturn(matchedDocuments);
         mockMvc
-                .perform(get("/documents/search?token=a&token=B&token=1c"))
+                .perform(get("/document/search?token=a&token=B&token=1c"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].key").value(hasItems("key1", "key2")));
@@ -119,7 +119,7 @@ public class DocumentsControllerTest {
         when(documentService.search(any())).thenReturn(null);
         when(documentService.search(searchQuery)).thenReturn(emptyList());
         mockMvc
-                .perform(get("/documents/search?token="))
+                .perform(get("/document/search?token="))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].key").isEmpty());

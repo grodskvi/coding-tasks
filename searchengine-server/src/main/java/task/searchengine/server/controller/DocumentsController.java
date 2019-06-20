@@ -38,7 +38,7 @@ public class DocumentsController {
         return documentService.addDocument(document);
     }
 
-    @GetMapping(path = "documents/search")
+    @GetMapping(path = "document/search")
     public List<DocumentKey> search(@RequestParam("token") List<String> searchTokens) {
         LOG.debug("Got search request by {}", searchTokens);
         SearchQuery searchQuery = new SearchQuery(searchTokens);

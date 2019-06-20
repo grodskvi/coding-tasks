@@ -62,7 +62,7 @@ public class SearchEngineFunctionalTest {
     private void searchDocuments(List<String> tokens, List<String> matchingDocuments) throws JSONException {
         String queryString = String.join("&", tokens.stream().map(token -> "token="+ token).collect(toList()));
 
-        ResponseEntity<String> searchResponse = restTemplate.getForEntity("/documents/search?" + queryString, String.class);
+        ResponseEntity<String> searchResponse = restTemplate.getForEntity("/document/search?" + queryString, String.class);
         assertThat(searchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         String expectedJson =
