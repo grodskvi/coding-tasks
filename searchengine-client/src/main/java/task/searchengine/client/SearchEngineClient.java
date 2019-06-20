@@ -77,7 +77,7 @@ public class SearchEngineClient {
                 .join("&", keywords.stream()
                 .map(t -> "token=" + t).collect(toList()));
 
-        HttpGet httpGet = new HttpGet(serverUrl + "/documents/search?" + queryString);
+        HttpGet httpGet = new HttpGet(serverUrl + "/document/search?" + queryString);
         HttpResponse httpResponse = doHttpResponse(httpGet, "application/json");
 
         String response = EntityUtils.toString(httpResponse.getEntity());
