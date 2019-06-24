@@ -4,6 +4,13 @@ public class Document {
     private DocumentKey documentKey;
     private String text;
 
+    public Document() {}
+
+    public Document(DocumentKey documentKey, String text) {
+        this.documentKey = documentKey;
+        this.text = text;
+    }
+
     public DocumentKey getDocumentKey() {
         return documentKey;
     }

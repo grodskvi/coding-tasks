@@ -1,5 +1,12 @@
 package task.searchengine.client;
 
+import task.searchengine.client.repository.DocumentRepository;
+import task.searchengine.client.repository.HttpDocumentRepository;
+import task.searchengine.client.service.ConsoleEventReporter;
+import task.searchengine.client.service.EventReporter;
+
+import task.searchengine.client.domain.event.ClientStartedEvent;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -14,9 +21,13 @@ public class SearchEngineClientLauncher {
 
         PrintWriter writer = new PrintWriter(System.out);
 
-        SearchEngineClient client = new SearchEngineClient(host, port, writer);
+        String serverUrl = "http://" + host + ":" + port;
+        DocumentRepository documentRepository = new HttpDocumentRepository(serverUrl);
+        EventReporter eventReporter = new ConsoleEventReporter(writer);
+        SearchEngineClient client = new SearchEngineClient(documentRepository, eventReporter);
+        ConsoleCommandDispatcher commandDispatcher = new ConsoleCommandDispatcher(client, eventReporter);
 
-        ConsoleCommandDispatcher commandDispatcher = new ConsoleCommandDispatcher(client, writer);
+        eventReporter.reportClientStarted(new ClientStartedEvent(serverUrl));
         commandDispatcher.run();
 
         writer.flush();

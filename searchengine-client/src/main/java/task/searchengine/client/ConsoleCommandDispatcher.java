@@ -1,27 +1,26 @@
 package task.searchengine.client;
 
+import task.searchengine.client.service.EventReporter;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleCommandDispatcher {
+
     private SearchEngineClient searchEngineClient;
-    private PrintWriter writer;
+    private EventReporter eventReporter;
 
 
-    public ConsoleCommandDispatcher(SearchEngineClient searchEngineClient, PrintWriter writer) {
+    public ConsoleCommandDispatcher(SearchEngineClient searchEngineClient, EventReporter eventReporter) {
         this.searchEngineClient = searchEngineClient;
-        this.writer = writer;
+        this.eventReporter = eventReporter;
     }
 
     public void run() {
-        writer.println("Connected to " + searchEngineClient.getServerUrl());
-        printCommandSummary();
-
         Scanner scanner = new Scanner(System.in);
-        printPrompt();
+        eventReporter.reportNextOperationAvailability();
         while (true) {
             String command = scanner.nextLine();
             if (command.equals("exit")) {
@@ -30,10 +29,9 @@ public class ConsoleCommandDispatcher {
             try {
                 dispatchCommand(command);
             } catch (IOException e) {
-                writer.println("ERROR: " + e.getMessage());
-                writer.flush();
+                eventReporter.reportError(e.getMessage());
             }
-            printPrompt();
+            eventReporter.reportNextOperationAvailability();
         }
     }
 
@@ -54,24 +52,7 @@ public class ConsoleCommandDispatcher {
                 searchEngineClient.searchDocuments(keywords);
                 break;
             default:
-                System.out.println("Unknown command");
+                eventReporter.reportError("Unknown command");
         }
-    }
-
-    private void printPrompt() {
-        writer.print("> ");
-        writer.flush();
-    }
-
-    private void printCommandSummary() {
-        writer.println("\nAvailable commands:");
-        writer.println("add <document key> <absolute file path>");
-        writer.println("\t\t\tadds file content to search engine\n");
-        writer.println("get <document key>");
-        writer.println("\t\t\tget content by document key\n");
-        writer.println("search <keyword1> <keyword2> ...");
-        writer.println("\t\t\tsearch documents by keyword\n");
-        writer.println("exit");
-        writer.flush();
     }
 }
