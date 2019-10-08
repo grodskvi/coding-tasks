@@ -9,5 +9,8 @@ import tasks.transferservice.domain.entity.Account;
 public interface AccountRepository {
 
     Account save(Account account);
+
+    Account update(Account account);
+
     Account findByAccountNumber(AccountNumber accountNumber);
 }

@@ -10,5 +10,5 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public class CreateAccountResponse {
-    private String accountId;
+    private String accountNumber;
 }

@@ -10,20 +10,20 @@ public class AccountNumberTest {
     @Test
     public void createsAccountNumber() {
         AccountNumber accountNumber = anAccountNumber("11112222");
-        assertThat(accountNumber.getAccountNumber()).isEqualTo("11112222");
+        assertThat(accountNumber.getValue()).isEqualTo("11112222");
     }
 
     @Test
     public void failsToCreateNullDomainKey() {
         assertThatThrownBy(() -> anAccountNumber(null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Can not create accountNumber with number 'null'");
+                .hasMessage("Can not create accountNumber with value 'null'");
     }
 
     @Test
     public void failsToCreateDomainKeyWithBlankId() {
         assertThatThrownBy(() -> anAccountNumber("   "))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Can not create accountNumber with number '   '");
+                .hasMessage("Can not create accountNumber with value '   '");
     }
 }

@@ -1,44 +1,26 @@
 package tasks.transferservice.repository;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-import static tasks.transferservice.domain.common.AccountDomainKey.anAccountDomainKey;
 import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
 import static tasks.transferservice.domain.common.Amount.ZERO_AMOUNT;
 import static tasks.transferservice.domain.common.Amount.amountOf;
 import static tasks.transferservice.domain.entity.Account.anAccount;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import tasks.transferservice.domain.common.AccountNumber;
+import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.common.Currency;
 import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.repository.exception.AlreadyPersistedEntityException;
 import tasks.transferservice.repository.exception.DuplicateEntityException;
-import tasks.transferservice.service.DomainKeyProvider;
+import tasks.transferservice.repository.exception.EntityNotFoundException;
 
-@RunWith(MockitoJUnitRunner.class)
 public class InMemoryAccountRepositoryTest {
 
     private static final AccountNumber ACCOUNT_NUMBER = anAccountNumber("1111");
 
-    @Mock
-    private DomainKeyProvider domainKeyProvider;
-
-    @InjectMocks
-    private InMemoryAccountRepository accountRepository;
-
-    @Before
-    public void setUp() {
-        when(domainKeyProvider.nextDomainKey()).thenReturn("account_domain_key");
-    }
+    private InMemoryAccountRepository accountRepository = new InMemoryAccountRepository();
 
     @Test
     public void savesAccount() {
@@ -48,16 +30,8 @@ public class InMemoryAccountRepositoryTest {
         Account savedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
 
         assertThat(savedAccount)
-            .extracting("domainKey", "accountNumber", "accountCurrency", "balance")
-            .containsExactly(anAccountDomainKey("account_domain_key"), anAccountNumber("1111"), Currency.EUR, ZERO_AMOUNT);
-    }
-
-    @Test
-    public void generatesAccountKeyOnSave() {
-        Account account = anAccount("1111", Currency.EUR);
-        Account savedAccount = accountRepository.save(account);
-
-        assertThat(savedAccount.getDomainKey()).isEqualTo(anAccountDomainKey("account_domain_key"));
+            .extracting("accountNumber", "accountCurrency", "balance")
+            .containsExactly(anAccountNumber("1111"), Currency.EUR, ZERO_AMOUNT);
     }
 
     @Test
@@ -72,20 +46,9 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void preventsSavingAlreadyPersistedAccount() {
-        Account account = anAccount("1111", Currency.EUR);
-        account.setDomainKey(anAccountDomainKey("existing_account_id"));
-
-        assertThatThrownBy(() -> accountRepository.save(account))
-                .isInstanceOf(AlreadyPersistedEntityException.class)
-                .hasMessage("Account with key AccountDomainKey(accountId=existing_account_id) is already persisted");
-    }
-
-    @Test
     public void findsAccountByAccountNumber() {
         Account account = anAccount("1111", Currency.EUR);
-
-        accountRepository.restoreRepositoryStateFrom(singletonList(account));
+        accountRepository.restoreRepositoryStateFrom(account);
 
         Account repoAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
         assertThat(repoAccount.getAccountNumber()).isEqualTo(ACCOUNT_NUMBER);
@@ -95,7 +58,7 @@ public class InMemoryAccountRepositoryTest {
     public void doesNotFindAccountByNonexistingAccountNumber() {
         Account account = anAccount("2222", Currency.EUR);
 
-        accountRepository.restoreRepositoryStateFrom(singletonList(account));
+        accountRepository.restoreRepositoryStateFrom(account);
 
         Account repoAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
         assertThat(repoAccount).isNull();
@@ -139,6 +102,74 @@ public class InMemoryAccountRepositoryTest {
 
         assertThat(retrievedAccount.getBalance()).isEqualTo(ZERO_AMOUNT);
         assertThat(savedAccount.getBalance()).isEqualTo(amountOf("100"));
+    }
+
+    @Test
+    public void ensuresSafePublicationOnRestoringState() {
+        Account account = anAccount("1111", Currency.EUR);
+        accountRepository.restoreRepositoryStateFrom(account);
+
+        account.credit(Amount.amountOf("10"));
+
+        Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
+        assertThat(retrievedAccount.getBalance()).isEqualTo(ZERO_AMOUNT);
+    }
+
+    @Test
+    public void updatesAccount() {
+        Account account = anAccount("1111", Currency.EUR);
+        accountRepository.restoreRepositoryStateFrom(account);
+
+        account.credit(Amount.amountOf("10"));
+
+        Account updatedAccount = accountRepository.update(account);
+        assertThat(updatedAccount.getBalance()).isEqualTo(amountOf("10"));
+
+        Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
+        assertThat(retrievedAccount.getBalance()).isEqualTo(amountOf("10"));
+    }
+
+    @Test
+    public void failsToUpdateNotExistingAccount() {
+        Account account = anAccount("1111", Currency.EUR);
+        account.credit(Amount.amountOf("10"));
+
+        assertThatThrownBy(() -> accountRepository.update(account))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Can not find entity of tasks.transferservice.domain.entity.Account with id 1111");
+
+        Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
+        assertThat(retrievedAccount).isNull();
+    }
+
+    @Test
+    public void ensuresSafePublicationOnUpdateOfParameter() {
+        Account account = anAccount("1111", Currency.EUR);
+        accountRepository.restoreRepositoryStateFrom(account);
+
+        account.credit(Amount.amountOf("10"));
+
+        accountRepository.update(account);
+        account.credit(Amount.amountOf("30"));
+
+        Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
+        assertThat(retrievedAccount.getBalance()).isEqualTo(amountOf("10"));
+        assertThat(account.getBalance()).isEqualTo(amountOf("40"));
+    }
+
+    @Test
+    public void ensuresSafePublicationOnUpdateOfResult() {
+        Account account = anAccount("1111", Currency.EUR);
+        accountRepository.restoreRepositoryStateFrom(account);
+
+        account.credit(amountOf("10"));
+        Account updatedAccount = accountRepository.update(account);
+
+        updatedAccount.credit(Amount.amountOf("30"));
+        Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
+
+        assertThat(retrievedAccount.getBalance()).isEqualTo(amountOf("10"));
+        assertThat(updatedAccount.getBalance()).isEqualTo(amountOf("40"));
     }
 
 }

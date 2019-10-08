@@ -9,10 +9,13 @@ import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tasks.transferservice.domain.common.AccountNumber;
+import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.DepositRequest;
 import tasks.transferservice.repository.AccountRepository;
+import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 @Service
 public class DefaultAccountService implements AccountService {
@@ -37,7 +40,18 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public void deposit(String accountId, DepositRequest depositRequest) {
+    public void deposit(AccountNumber accountNumber, DepositRequest depositRequest) {
+        LOG.debug("Handling {} for account {}", depositRequest, accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account == null) {
+            LOG.info("Account {} does not exist. Can't complete {}", accountNumber, depositRequest);
+            throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+        }
 
+        Amount depositAmount = Amount.amountOf(depositRequest.getAmount());
+        account.credit(depositAmount);
+
+        Account updatedAccount = accountRepository.update(account);
+        LOG.info("Updated account {} according to {}", updatedAccount, depositRequest);
     }
 }

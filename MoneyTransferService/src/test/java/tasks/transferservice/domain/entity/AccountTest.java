@@ -1,23 +1,28 @@
 package tasks.transferservice.domain.entity;
 
-import org.junit.Test;
-import tasks.transferservice.domain.common.Amount;
-import tasks.transferservice.domain.exception.InsufficientFundsException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static tasks.transferservice.domain.common.AccountOperation.anAccountOperation;
+import static tasks.transferservice.domain.common.AccountOperationType.CREDIT;
+import static tasks.transferservice.domain.common.AccountOperationType.DEBIT;
 import static tasks.transferservice.domain.common.Amount.amountOf;
 import static tasks.transferservice.domain.common.Currency.EUR;
 import static tasks.transferservice.domain.entity.Account.anAccount;
+
+import org.junit.Test;
+
+import tasks.transferservice.domain.common.AccountOperation;
+import tasks.transferservice.domain.common.Amount;
+import tasks.transferservice.domain.exception.InsufficientFundsException;
 
 public class AccountTest {
 
     private static final String ACCOUNT_NUMBER = "111-222-333";
 
+    private Account account = anAccount(ACCOUNT_NUMBER, EUR);
+
     @Test
     public void initializesAccountWithZeroBalance() {
-        Account account = anAccount(ACCOUNT_NUMBER, EUR);
-
         assertThat(account.getBalance()).isEqualTo(Amount.ZERO_AMOUNT);
     }
 
@@ -37,7 +42,6 @@ public class AccountTest {
 
     @Test
     public void updatesAccountBalanceOnCredit() {
-        Account account = anAccount(ACCOUNT_NUMBER, EUR);
         Amount creditAmount = amountOf("34.08");
 
         account.credit(creditAmount);
@@ -47,7 +51,6 @@ public class AccountTest {
 
     @Test
     public void updatesAccountBalanceOnSequentialCredits() {
-        Account account = anAccount(ACCOUNT_NUMBER, EUR);
         Amount creditAmount = amountOf("34.08");
         Amount nextCreditAmount = amountOf("15");
 
@@ -59,7 +62,6 @@ public class AccountTest {
 
     @Test
     public void updatesAccountBalanceOnDebit() throws InsufficientFundsException {
-        Account account = anAccount(ACCOUNT_NUMBER, EUR);
         Amount creditAmount = amountOf("34.08");
         Amount debitAmount = amountOf("15");
 
@@ -70,8 +72,7 @@ public class AccountTest {
     }
 
     @Test
-    public void failsOnDebettingAmountMoreThenAvalableBalance() throws InsufficientFundsException {
-        Account account = anAccount(ACCOUNT_NUMBER, EUR);
+    public void failsOnDebettingAmountMoreThenAvailableBalance() {
         Amount creditAmount = amountOf("34.08");
         Amount debitAmount = amountOf("50.00");
 
@@ -80,6 +81,28 @@ public class AccountTest {
                 .isInstanceOf(InsufficientFundsException.class);
 
         assertThat(account.getBalance()).isEqualTo(creditAmount);
+    }
+
+    @Test
+    public void recordsOperationOnCredit() {
+        Amount creditAmount = amountOf("34.08");
+        account.credit(creditAmount);
+
+        AccountOperation expectedStatementItem = anAccountOperation(CREDIT, creditAmount, EUR);
+        assertThat(account.getAccountStatement()).containsExactly(expectedStatementItem);
+    }
+
+    @Test
+    public void recordsOperationOnDebit() throws InsufficientFundsException {
+        Amount creditAmount = amountOf("34.08");
+        Amount debitAmount = amountOf("17");
+
+        account.credit(creditAmount);
+        account.debit(debitAmount);
+
+        assertThat(account.getAccountStatement()).containsExactly(
+            anAccountOperation(CREDIT, creditAmount, EUR),
+            anAccountOperation(DEBIT, debitAmount, EUR));
     }
 
 }

@@ -1,39 +1,38 @@
 package tasks.transferservice.domain.entity;
 
+import static java.lang.String.format;
+import static java.util.Collections.unmodifiableList;
+import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
+import static tasks.transferservice.domain.common.AccountOperation.anAccountOperation;
+import static tasks.transferservice.domain.common.AccountOperationType.CREDIT;
+import static tasks.transferservice.domain.common.AccountOperationType.DEBIT;
+import static tasks.transferservice.domain.common.Amount.ZERO_AMOUNT;
+import static tasks.transferservice.domain.common.Amount.amountOf;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import lombok.ToString;
-import tasks.transferservice.domain.common.AccountDomainKey;
 import tasks.transferservice.domain.common.AccountNumber;
+import tasks.transferservice.domain.common.AccountOperation;
 import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.common.Currency;
 import tasks.transferservice.domain.exception.InsufficientFundsException;
 import tasks.transferservice.validation.Preconditions;
 
-import java.util.Objects;
-
-import static java.lang.String.format;
-import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
-import static tasks.transferservice.domain.common.Amount.ZERO_AMOUNT;
-import static tasks.transferservice.domain.common.Amount.amountOf;
-
 @ToString
 public class Account implements Cloneable {
-    private AccountDomainKey domainKey;
     private AccountNumber accountNumber;
     private Currency accountCurrency;
     private Amount balance;
+    private List<AccountOperation> accountStatement;
 
     private Account(AccountNumber accountNumber, Currency accountCurrency, Amount balance) {
         this.accountNumber = accountNumber;
         this.accountCurrency = accountCurrency;
         this.balance = balance;
-    }
-
-    public AccountDomainKey getDomainKey() {
-        return domainKey;
-    }
-
-    public void setDomainKey(AccountDomainKey domainKey) {
-        this.domainKey = domainKey;
+        this.accountStatement = new ArrayList<>(); //single account instance should be never accessed from several threads
     }
 
     public Amount getBalance() {
@@ -48,6 +47,7 @@ public class Account implements Cloneable {
         Preconditions.checkNotNull(creditAmount, "Attempted to credit %s with null amount", accountNumber);
 
         balance = balance.increaseBy(creditAmount);
+        accountStatement.add(anAccountOperation(CREDIT, creditAmount, accountCurrency));
         return balance;
     }
 
@@ -62,29 +62,30 @@ public class Account implements Cloneable {
         }
 
         balance = balance.decreaseBy(debitAmount);
+        accountStatement.add(anAccountOperation(DEBIT, debitAmount, accountCurrency));
         return balance;
     }
 
+    public List<AccountOperation> getAccountStatement() {
+        return unmodifiableList(accountStatement);
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(domainKey, account.domainKey);
+        return Objects.equals(accountNumber, account.accountNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(domainKey);
+        return Objects.hash(accountNumber);
     }
 
     @Override
     public Account clone() {
-        Account account = new Account(accountNumber, accountCurrency, amountOf(balance.getValue()));
-        account.domainKey = domainKey;
-
-        return account;
+        return new Account(accountNumber, accountCurrency, amountOf(balance.getValue()));
     }
 
     public static Account anAccount(String accountNumber, Currency accountCurrency) {

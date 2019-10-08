@@ -48,8 +48,8 @@ public class TransferServiceApplicationIntegrationTest {
 
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.readEntity(CreateAccountResponse.class))
-            .extracting("accountId")
-            .isNotNull();
+            .extracting("accountNumber")
+            .isEqualTo("11111");
     }
 
     @Test
