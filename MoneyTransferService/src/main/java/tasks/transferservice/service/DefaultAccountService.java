@@ -54,4 +54,14 @@ public class DefaultAccountService implements AccountService {
         Account updatedAccount = accountRepository.update(account);
         LOG.info("Updated account {} according to {}", updatedAccount, depositRequest);
     }
+
+    @Override
+    public Account getAccount(AccountNumber accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account == null) {
+            LOG.info("Can not find account by {}", accountNumber);
+            throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+        }
+        return account;
+    }
 }

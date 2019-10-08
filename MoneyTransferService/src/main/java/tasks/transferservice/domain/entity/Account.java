@@ -43,6 +43,10 @@ public class Account implements Cloneable {
         return accountNumber;
     }
 
+    public Currency getAccountCurrency() {
+        return accountCurrency;
+    }
+
     public Amount credit(Amount creditAmount) {
         Preconditions.checkNotNull(creditAmount, "Attempted to credit %s with null amount", accountNumber);
 

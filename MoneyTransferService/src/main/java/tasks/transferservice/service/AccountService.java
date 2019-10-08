@@ -12,4 +12,6 @@ public interface AccountService {
     Account createAccount(CreateAccountRequest createAccountRequest);
 
     void deposit(AccountNumber accountId, DepositRequest depositRequest);
+
+    Account getAccount(AccountNumber accountNumber);
 }

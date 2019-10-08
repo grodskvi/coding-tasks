@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.exception.InputDataValidationException;
+import tasks.transferservice.domain.rest.AccountBalanceResponse;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.CreateAccountResponse;
 import tasks.transferservice.domain.rest.DepositRequest;
@@ -60,6 +62,15 @@ public class AccountResource {
         response.setAccountNumber(accountNumber.getValue());
 
         return response;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{accountNumber}/balance")
+    public AccountBalanceResponse getBalance(@PathParam("accountNumber") String accountNumber) {
+        LOG.debug("Checking balance for {}", accountNumber);
+        Account account = accountService.getAccount(anAccountNumber(accountNumber));
+        return new AccountBalanceResponse(account.getBalance().getValue());
     }
 
     @POST

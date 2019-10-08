@@ -8,6 +8,8 @@ import tasks.transferservice.repository.AccountRepository;
 import tasks.transferservice.repository.InMemoryAccountRepository;
 import tasks.transferservice.service.AccountService;
 import tasks.transferservice.service.DefaultAccountService;
+import tasks.transferservice.service.DefaultTransferService;
+import tasks.transferservice.service.TransferService;
 import tasks.transferservice.validation.CreateAccountRequestValidator;
 import tasks.transferservice.validation.DepositRequestValidator;
 
@@ -19,6 +21,7 @@ public class TransferServiceApplicationConfiguration extends AbstractBinder {
         bindAsContract(DepositRequestValidator.class);
 
         bind(DefaultAccountService.class).to(AccountService.class).in(Singleton.class);
+        bind(DefaultTransferService.class).to(TransferService.class).in(Singleton.class);
         bind(InMemoryAccountRepository.class).to(AccountRepository.class).in(Singleton.class);
     }
 }
