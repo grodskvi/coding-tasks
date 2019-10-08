@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 @ToString
 public class Currency {
 
-    private static final Predicate<String> ISO_CODE_VALIDATOR = ((Predicate<String>) StringUtils::isAlpha)
+    public static final Predicate<String> ISO_CODE_VALIDATOR = ((Predicate<String>) StringUtils::isAlpha)
             .and(isoCode -> isoCode.length() == 3);
 
     public static final Currency EUR = currencyOf("EUR");

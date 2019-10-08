@@ -1,21 +1,25 @@
 package tasks.transferservice.application;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import tasks.transferservice.application.server.JettyServer;
-import tasks.transferservice.domain.rest.ExecuteTransferRequest;
-import tasks.transferservice.domain.rest.ExecuteTransferResponse;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import java.math.BigDecimal;
-import java.util.Map;
+import javax.ws.rs.core.Response;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import tasks.transferservice.application.server.JettyServer;
+import tasks.transferservice.domain.rest.CreateAccountRequest;
+import tasks.transferservice.domain.rest.CreateAccountResponse;
+import tasks.transferservice.domain.rest.ErrorResponse;
+import tasks.transferservice.domain.rest.ExecuteTransferRequest;
+import tasks.transferservice.domain.rest.ExecuteTransferResponse;
 
 public class TransferServiceApplicationIntegrationTest {
     private JettyServer server;
@@ -29,8 +33,38 @@ public class TransferServiceApplicationIntegrationTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         server.stop();
+    }
+
+    @Test
+    public void createsAccount() {
+        CreateAccountRequest request = new CreateAccountRequest();
+        request.setAccountNumber("11111");
+        request.setCurrencyIsoCode("EUR");
+
+        Response response = target.path("account").request()
+            .post(Entity.json(request));
+
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.readEntity(CreateAccountResponse.class))
+            .extracting("accountId")
+            .isNotNull();
+    }
+
+    @Test
+    public void failsToCreateAccountWithoutAccountNumber() {
+        CreateAccountRequest request = new CreateAccountRequest();
+        request.setAccountNumber("");
+        request.setCurrencyIsoCode("EUR");
+
+        Response response = target.path("account").request()
+            .post(Entity.json(request));
+
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.readEntity(ErrorResponse.class))
+            .extracting("message")
+            .isNotNull();
     }
 
     @Test

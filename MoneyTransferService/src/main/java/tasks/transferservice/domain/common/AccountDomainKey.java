@@ -10,7 +10,7 @@ import tasks.transferservice.validation.Preconditions;
 public class AccountDomainKey {
     private final String accountId;
 
-    public AccountDomainKey(String accountId) {
+    private AccountDomainKey(String accountId) {
         this.accountId = accountId;
     }
 

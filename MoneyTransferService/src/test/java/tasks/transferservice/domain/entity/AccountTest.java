@@ -12,7 +12,7 @@ import static tasks.transferservice.domain.entity.Account.anAccount;
 
 public class AccountTest {
 
-    public static final String ACCOUNT_NUMBER = "111-222-333";
+    private static final String ACCOUNT_NUMBER = "111-222-333";
 
     @Test
     public void initializesAccountWithZeroBalance() {

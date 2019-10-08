@@ -31,7 +31,7 @@ public class TransferServiceApplication {
 
     public static JettyServer startServer(int port) throws Exception {
         return JettyServerLauncher.aServerRunningOnPort(port)
-                .withResourcePackage("tasks.transferservice.rest.resources")
+                .withResourcePackage("tasks.transferservice.rest")
                 .withApplicationName(APPLICATION_NAME)
                 .withFeature(JacksonFeature.class)
                 .withConfiguration(new TransferServiceApplicationConfiguration())

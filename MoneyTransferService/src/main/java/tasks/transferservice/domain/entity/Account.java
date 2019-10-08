@@ -1,5 +1,6 @@
 package tasks.transferservice.domain.entity;
 
+import lombok.ToString;
 import tasks.transferservice.domain.common.AccountDomainKey;
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.common.Amount;
@@ -12,21 +13,35 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
 import static tasks.transferservice.domain.common.Amount.ZERO_AMOUNT;
+import static tasks.transferservice.domain.common.Amount.amountOf;
 
-public class Account {
+@ToString
+public class Account implements Cloneable {
     private AccountDomainKey domainKey;
     private AccountNumber accountNumber;
     private Currency accountCurrency;
     private Amount balance;
 
-    public Account(AccountNumber accountNumber, Currency accountCurrency, Amount balance) {
+    private Account(AccountNumber accountNumber, Currency accountCurrency, Amount balance) {
         this.accountNumber = accountNumber;
         this.accountCurrency = accountCurrency;
         this.balance = balance;
     }
 
+    public AccountDomainKey getDomainKey() {
+        return domainKey;
+    }
+
+    public void setDomainKey(AccountDomainKey domainKey) {
+        this.domainKey = domainKey;
+    }
+
     public Amount getBalance() {
         return balance;
+    }
+
+    public AccountNumber getAccountNumber() {
+        return accountNumber;
     }
 
     public Amount credit(Amount creditAmount) {
@@ -62,6 +77,14 @@ public class Account {
     @Override
     public int hashCode() {
         return Objects.hash(domainKey);
+    }
+
+    @Override
+    public Account clone() {
+        Account account = new Account(accountNumber, accountCurrency, amountOf(balance.getValue()));
+        account.domainKey = domainKey;
+
+        return account;
     }
 
     public static Account anAccount(String accountNumber, Currency accountCurrency) {

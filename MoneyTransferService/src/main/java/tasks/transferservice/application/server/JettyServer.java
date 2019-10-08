@@ -18,13 +18,13 @@ public class JettyServer {
     private ResourceConfig resourceConfig;
     private Server server;
 
-    public JettyServer(String applicationName, int port, ResourceConfig resourceConfig) {
+    JettyServer(String applicationName, int port, ResourceConfig resourceConfig) {
         this.applicationName = applicationName;
         this.port = port;
         this.resourceConfig = resourceConfig;
     }
 
-    public void start() throws Exception {
+    void start() throws Exception {
         if (server != null) {
             throw new RuntimeException("Server is already running");
         }
