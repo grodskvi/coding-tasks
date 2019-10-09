@@ -51,7 +51,7 @@ public class DefaultAccountService implements AccountService {
             account = accountRepository.lockForUpdate(accountNumber);
             if (account == null) {
                 LOG.info("Account {} does not exist. Can't complete {}", accountNumber, depositRequest);
-                throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+                throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
             }
 
             Amount depositAmount = Amount.amountOf(depositRequest.getAmount());
@@ -69,7 +69,7 @@ public class DefaultAccountService implements AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account == null) {
             LOG.info("Can not find account by {}", accountNumber);
-            throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+            throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
         }
         return account;
     }

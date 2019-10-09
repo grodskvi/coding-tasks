@@ -45,7 +45,8 @@ public class Account implements Cloneable {
     }
 
     public boolean hasAccountNumberValueOf(String accountNumber) {
-        return this.getAccountNumber().getValue().equals(accountNumber);
+        String accountNumberValue = this.accountNumber.getValue();
+        return accountNumberValue.equals(accountNumber);
     }
 
     public Currency getAccountCurrency() {
@@ -77,6 +78,14 @@ public class Account implements Cloneable {
 
     public List<AccountOperation> getAccountStatement() {
         return unmodifiableList(accountStatement);
+    }
+
+    public EntityKey toEntityKey() {
+        return toEntityKey(accountNumber);
+    }
+
+    public static EntityKey toEntityKey(AccountNumber accountNumber) {
+        return new EntityKey(accountNumber.getValue(), Account.class);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class InMemoryAccountRepository implements AccountRepository {
 
         if (updatedAccount == null) {
             LOG.info("Attempting to update non-existing account {}", account.getAccountNumber());
-            throw new EntityNotFoundException(account.getAccountNumber().getValue(), Account.class);
+            throw new EntityNotFoundException(account.toEntityKey());
         }
 
         return updatedAccount.getEntity();
@@ -68,7 +68,8 @@ public class InMemoryAccountRepository implements AccountRepository {
     public Account lockForUpdate(AccountNumber accountNumber) {
         PersistedEntity<Account> account = accounts.get(accountNumber);
         if (account == null) {
-            return null;
+            LOG.warn("Account {} is not found. Nothing to lock", account);
+            throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
         }
         account.lockForUpdate();
         return accounts.get(accountNumber).getEntity();
@@ -79,8 +80,8 @@ public class InMemoryAccountRepository implements AccountRepository {
         LOG.debug("Unlocking account {}", account.getAccountNumber());
         PersistedEntity<Account> persistedEntity = accounts.get(account.getAccountNumber());
         if (persistedEntity == null) {
-            LOG.info("Account {} is not found. Nothing to unlock", account);
-            throw new EntityNotFoundException(account.getAccountNumber().getValue(), Account.class);
+            LOG.warn("Account {} is not found. Nothing to unlock", account);
+            throw new EntityNotFoundException(account.toEntityKey());
         }
         persistedEntity.unlock();
     }
