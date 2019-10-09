@@ -56,6 +56,8 @@ public class DefaultAccountServiceTest {
         DepositRequest depositRequest = new DepositRequest("request_id", depositAmount);
 
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(anAccount(accountNumber.getValue(), EUR));
+        when(accountRepository.lockForUpdate(accountNumber)).thenReturn(anAccount(accountNumber.getValue(), EUR));
+
         accountService.deposit(accountNumber, depositRequest);
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);

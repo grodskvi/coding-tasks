@@ -22,8 +22,12 @@ public class DefaultAccountService implements AccountService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAccountService.class);
 
-    @Inject
     private AccountRepository accountRepository;
+
+    @Inject
+    public DefaultAccountService(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
 
     @Override
     public Account createAccount(CreateAccountRequest createAccountRequest) {
@@ -42,17 +46,22 @@ public class DefaultAccountService implements AccountService {
     @Override
     public void deposit(AccountNumber accountNumber, DepositRequest depositRequest) {
         LOG.debug("Handling {} for account {}", depositRequest, accountNumber);
-        Account account = accountRepository.findByAccountNumber(accountNumber);
-        if (account == null) {
-            LOG.info("Account {} does not exist. Can't complete {}", accountNumber, depositRequest);
-            throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+        Account account = null;
+        try {
+            account = accountRepository.lockForUpdate(accountNumber);
+            if (account == null) {
+                LOG.info("Account {} does not exist. Can't complete {}", accountNumber, depositRequest);
+                throw new EntityNotFoundException(accountNumber.getValue(), Account.class);
+            }
+
+            Amount depositAmount = Amount.amountOf(depositRequest.getAmount());
+            account.credit(depositAmount);
+
+            Account updatedAccount = accountRepository.update(account);
+            LOG.info("Updated account {} according to {}", updatedAccount, depositRequest);
+        } finally {
+            accountRepository.unlock(account);
         }
-
-        Amount depositAmount = Amount.amountOf(depositRequest.getAmount());
-        account.credit(depositAmount);
-
-        Account updatedAccount = accountRepository.update(account);
-        LOG.info("Updated account {} according to {}", updatedAccount, depositRequest);
     }
 
     @Override

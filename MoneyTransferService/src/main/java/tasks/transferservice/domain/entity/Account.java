@@ -1,6 +1,7 @@
 package tasks.transferservice.domain.entity;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
 import static tasks.transferservice.domain.common.AccountOperation.anAccountOperation;
@@ -28,11 +29,11 @@ public class Account implements Cloneable {
     private Amount balance;
     private List<AccountOperation> accountStatement;
 
-    private Account(AccountNumber accountNumber, Currency accountCurrency, Amount balance) {
+    private Account(AccountNumber accountNumber, Currency accountCurrency, Amount balance, List<AccountOperation> accountStatement) {
         this.accountNumber = accountNumber;
         this.accountCurrency = accountCurrency;
         this.balance = balance;
-        this.accountStatement = new ArrayList<>(); //single account instance should be never accessed from several threads
+        this.accountStatement = new ArrayList<>(accountStatement); //single account instance should be never accessed from several threads
     }
 
     public Amount getBalance() {
@@ -41,6 +42,10 @@ public class Account implements Cloneable {
 
     public AccountNumber getAccountNumber() {
         return accountNumber;
+    }
+
+    public boolean hasAccountNumberValueOf(String accountNumber) {
+        return this.getAccountNumber().getValue().equals(accountNumber);
     }
 
     public Currency getAccountCurrency() {
@@ -89,13 +94,13 @@ public class Account implements Cloneable {
 
     @Override
     public Account clone() {
-        return new Account(accountNumber, accountCurrency, amountOf(balance.getValue()));
+        return new Account(accountNumber, accountCurrency, amountOf(balance.getValue()), accountStatement);
     }
 
     public static Account anAccount(String accountNumber, Currency accountCurrency) {
         Preconditions.checkNotNull(accountNumber, "Can not create account without account number");
         Preconditions.checkNotNull(accountCurrency, "Can not create account without currency");
 
-        return new Account(anAccountNumber(accountNumber), accountCurrency, ZERO_AMOUNT);
+        return new Account(anAccountNumber(accountNumber), accountCurrency, ZERO_AMOUNT, emptyList());
     }
 }

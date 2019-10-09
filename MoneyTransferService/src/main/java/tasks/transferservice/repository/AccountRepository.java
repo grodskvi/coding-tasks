@@ -13,4 +13,8 @@ public interface AccountRepository {
     Account update(Account account);
 
     Account findByAccountNumber(AccountNumber accountNumber);
+
+    Account lockForUpdate(AccountNumber accountNumber);
+
+    void unlock(Account account);
 }

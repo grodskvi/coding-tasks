@@ -58,10 +58,13 @@ public class DefaultTransferServiceTest {
 
         when(accountRepository.findByAccountNumber(CREDIT_ACCOUNT_NUMBER)).thenReturn(creditAccount);
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
+        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenReturn(creditAccount);
+        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
     }
 
     @Test
     public void raisesExceptionIfDebitAccountDoesNotExist() {
+        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
@@ -73,6 +76,7 @@ public class DefaultTransferServiceTest {
 
     @Test
     public void raisesExceptionIfCreditAccountDoesNotExist() {
+        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
         when(accountRepository.findByAccountNumber(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
@@ -85,6 +89,7 @@ public class DefaultTransferServiceTest {
     @Test
     public void raisesExceptionIfAccountsHaveDifferentCurrencies() {
         Account debitAccount = anAccount(DEBIT_ACCOUNT_NUMBER.getValue(), USD);
+        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))

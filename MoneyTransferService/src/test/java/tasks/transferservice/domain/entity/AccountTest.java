@@ -105,4 +105,13 @@ public class AccountTest {
             anAccountOperation(DEBIT, debitAmount, EUR));
     }
 
+    @Test
+    public void clonesAllFields() throws InsufficientFundsException {
+        Account account = anAccount("111", EUR);
+        account.credit(amountOf("100"));
+        account.debit(amountOf("30"));
+
+        assertThat(account.clone()).isEqualToComparingFieldByField(account);
+    }
+
 }
