@@ -80,14 +80,6 @@ public class Account implements Cloneable {
         return unmodifiableList(accountStatement);
     }
 
-    public EntityKey toEntityKey() {
-        return toEntityKey(accountNumber);
-    }
-
-    public static EntityKey toEntityKey(AccountNumber accountNumber) {
-        return new EntityKey(accountNumber.getValue(), Account.class);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

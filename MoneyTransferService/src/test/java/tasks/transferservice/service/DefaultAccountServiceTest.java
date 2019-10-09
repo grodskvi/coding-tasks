@@ -23,10 +23,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.DepositRequest;
 import tasks.transferservice.repository.AccountRepository;
-import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAccountServiceTest {
@@ -77,7 +77,7 @@ public class DefaultAccountServiceTest {
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(null);
 
         assertThatThrownBy(() -> accountService.deposit(accountNumber, depositRequest))
-            .isInstanceOf(EntityNotFoundException.class);
+            .isInstanceOf(AccountNotFoundException.class);
         verify(accountRepository, never()).update(any());
     }
 }

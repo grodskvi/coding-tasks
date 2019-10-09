@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.exception.InsufficientFundsException;
 import tasks.transferservice.domain.exception.InvalidTransferException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
@@ -49,10 +50,7 @@ public class DefaultTransferService implements TransferService {
         Account accountB = null;
         try {
             accountA = accountRepository.lockForUpdate(anAccountNumber(accountNumberA));
-            checkAccountNotNull(accountA, accountNumberA, transferRequest);
-
             accountB = accountRepository.lockForUpdate(anAccountNumber(accountNumberB));
-            checkAccountNotNull(accountB, accountNumberB, transferRequest);
 
             Account creditAccount = findFirstMatch(transferRequest.getCreditAccount(),
                 ACCOUNT_NUMBER_MATCHES, accountA, accountB);
@@ -66,16 +64,12 @@ public class DefaultTransferService implements TransferService {
         } catch (InsufficientFundsException e) {
             LOG.info("Debit account does not have enough funds to complete transfer {}", transferRequest, e);
             throw new InvalidTransferException(transferRequest, "Debit account does not have enough funds to complete transfer");
+        } catch (AccountNotFoundException e) {
+            LOG.info("Can not execute transfer {}: {}", transferRequest, e.getMessage());
+            throw new InvalidTransferException(transferRequest, format("Can not execute transfer %s. %s", transferRequest.getTransferRequestId(), e.getMessage()));
         } finally {
             accountRepository.unlock(accountB);
             accountRepository.unlock(accountA);
-        }
-    }
-
-    private void checkAccountNotNull(Account account, String accountNumber, ExecuteTransferRequest transferRequest) {
-        if (account == null) {
-            LOG.info("Account {} does not exist. Can not execute transfer {}", accountNumber, transferRequest);
-            throw new InvalidTransferException(transferRequest, format("Account '%s' does not exist", accountNumber));
         }
     }
 

@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.DepositRequest;
 import tasks.transferservice.repository.AccountRepository;
-import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 @Service
 public class DefaultAccountService implements AccountService {
@@ -51,7 +51,7 @@ public class DefaultAccountService implements AccountService {
             account = accountRepository.lockForUpdate(accountNumber);
             if (account == null) {
                 LOG.info("Account {} does not exist. Can't complete {}", accountNumber, depositRequest);
-                throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
+                throw new AccountNotFoundException(accountNumber);
             }
 
             Amount depositAmount = Amount.amountOf(depositRequest.getAmount());
@@ -69,7 +69,7 @@ public class DefaultAccountService implements AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account == null) {
             LOG.info("Can not find account by {}", accountNumber);
-            throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
+            throw new AccountNotFoundException(accountNumber);
         }
         return account;
     }

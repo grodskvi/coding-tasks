@@ -8,16 +8,16 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.rest.ErrorResponse;
-import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 @Provider
-public class EntityNotFoundExceptionMapper implements ExceptionMapper<EntityNotFoundException> {
+public class AccountNotFoundExceptionMapper implements ExceptionMapper<AccountNotFoundException> {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvalidDataExceptionMapper.class);
 
     @Override
-    public Response toResponse(EntityNotFoundException e) {
+    public Response toResponse(AccountNotFoundException e) {
         LOG.info("Converting exception to response ", e);
 
         ErrorResponse errorResponse = new ErrorResponse();

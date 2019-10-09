@@ -13,8 +13,8 @@ import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.common.Currency;
 import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.repository.exception.DuplicateEntityException;
-import tasks.transferservice.repository.exception.EntityNotFoundException;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 
 public class InMemoryAccountRepositoryTest {
 
@@ -41,7 +41,7 @@ public class InMemoryAccountRepositoryTest {
 
         Account otherAccount = anAccount("1111", Currency.USD);
         assertThatThrownBy(() -> accountRepository.save(otherAccount))
-                .isInstanceOf(DuplicateEntityException.class)
+                .isInstanceOf(DuplicateAccountException.class)
                 .hasMessage("Account 1111 already exists");
     }
 
@@ -135,8 +135,8 @@ public class InMemoryAccountRepositoryTest {
         account.credit(Amount.amountOf("10"));
 
         assertThatThrownBy(() -> accountRepository.update(account))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Can not find entity of tasks.transferservice.domain.entity.Account with id 1111");
+            .isInstanceOf(AccountNotFoundException.class)
+            .hasMessage("Account '1111' does not exist");
 
         Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
         assertThat(retrievedAccount).isNull();

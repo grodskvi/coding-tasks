@@ -1,25 +1,5 @@
 package tasks.transferservice.service;
 
-import lombok.Getter;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import tasks.transferservice.domain.common.AccountNumber;
-import tasks.transferservice.domain.common.AccountOperation;
-import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.domain.rest.CreateAccountRequest;
-import tasks.transferservice.domain.rest.DepositRequest;
-import tasks.transferservice.repository.AccountRepository;
-import tasks.transferservice.repository.InMemoryAccountRepository;
-import tasks.transferservice.repository.exception.DuplicateEntityException;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tasks.transferservice.domain.common.AccountOperation.anAccountOperation;
@@ -28,6 +8,35 @@ import static tasks.transferservice.domain.common.Amount.amountOf;
 import static tasks.transferservice.domain.common.Currency.EUR;
 import static tasks.transferservice.domain.entity.Account.anAccount;
 import static tasks.transferservice.service.FutureSuiteResult.futureSuite;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import lombok.Getter;
+import tasks.transferservice.domain.common.AccountNumber;
+import tasks.transferservice.domain.common.AccountOperation;
+import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
+import tasks.transferservice.domain.rest.CreateAccountRequest;
+import tasks.transferservice.domain.rest.DepositRequest;
+import tasks.transferservice.repository.AccountRepository;
+import tasks.transferservice.repository.InMemoryAccountRepository;
 
 public class DefaultAccountServiceIntegrationTest {
 
@@ -112,7 +121,7 @@ public class DefaultAccountServiceIntegrationTest {
         assertThat(results.getItems()).hasSize(1);
         assertThat(results.getErrors())
                 .hasSize(requestsCount - 1)
-                .allMatch(e -> e.getClass().equals(DuplicateEntityException.class));
+                .allMatch(e -> e.getClass().equals(DuplicateAccountException.class));
     }
 
     private <T, R> List<Future<R>> submitTasks(List<T> items, Function<T, Callable<R>> task) {
@@ -120,14 +129,12 @@ public class DefaultAccountServiceIntegrationTest {
                 .map(item -> executorService.submit(task.apply(item)))
                 .collect(toList());
     }
-
-
 }
 
 @Getter
 class FutureSuiteResult<T> {
-   private List<T> items = new ArrayList<>();
-    private List<Throwable> errors = new ArrayList<>();
+   private List<T> items;
+    private List<Throwable> errors;
 
     private FutureSuiteResult(List<T> items, List<Throwable> errors) {
         this.items = items;

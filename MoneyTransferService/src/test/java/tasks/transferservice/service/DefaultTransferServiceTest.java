@@ -26,6 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.exception.InvalidTransferException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
 import tasks.transferservice.repository.AccountRepository;
@@ -49,6 +50,7 @@ public class DefaultTransferServiceTest {
     @Before
     public void setUp() {
         transferRequest = new ExecuteTransferRequest();
+        transferRequest.setTransferRequestId("transfer_id");
         transferRequest.setCreditAccount(CREDIT_ACCOUNT_NUMBER.getValue());
         transferRequest.setDebitAccount(DEBIT_ACCOUNT_NUMBER.getValue());
         transferRequest.setTransferAmount(BigDecimal.TEN);
@@ -64,24 +66,24 @@ public class DefaultTransferServiceTest {
 
     @Test
     public void raisesExceptionIfDebitAccountDoesNotExist() {
-        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
+        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenThrow(new AccountNotFoundException(anAccountNumber("debit_account_number")));
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
             .isInstanceOf(InvalidTransferException.class)
-            .hasMessage("Account 'debit_account_number' does not exist");
+            .hasMessage("Can not execute transfer transfer_id. Account 'debit_account_number' does not exist");
 
         verify(accountRepository, never()).update(any());
     }
 
     @Test
     public void raisesExceptionIfCreditAccountDoesNotExist() {
-        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
+        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenThrow(new AccountNotFoundException(anAccountNumber("credit_account_number")));
         when(accountRepository.findByAccountNumber(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
             .isInstanceOf(InvalidTransferException.class)
-            .hasMessage("Account 'credit_account_number' does not exist");
+            .hasMessage("Can not execute transfer transfer_id. Account 'credit_account_number' does not exist");
 
         verify(accountRepository, never()).update(any());
     }

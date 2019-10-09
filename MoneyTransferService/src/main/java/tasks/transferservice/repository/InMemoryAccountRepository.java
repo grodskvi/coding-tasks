@@ -1,6 +1,5 @@
 package tasks.transferservice.repository;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static tasks.transferservice.repository.PersistedEntity.persistedEntity;
 
@@ -15,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.repository.exception.DuplicateEntityException;
-import tasks.transferservice.repository.exception.EntityNotFoundException;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 
 @Service
 public class InMemoryAccountRepository implements AccountRepository {
@@ -37,7 +36,7 @@ public class InMemoryAccountRepository implements AccountRepository {
                 accounts.putIfAbsent(accountNumber, persistedAccount);
         if (existingAccount != null) {
             LOG.info("Account {} already exists: {}", accountNumber, account);
-            throw new DuplicateEntityException(format("Account %s already exists", accountNumber.getValue()));
+            throw new DuplicateAccountException(accountNumber);
         }
         return persistedAccount.getEntity();
     }
@@ -52,7 +51,7 @@ public class InMemoryAccountRepository implements AccountRepository {
 
         if (updatedAccount == null) {
             LOG.info("Attempting to update non-existing account {}", account.getAccountNumber());
-            throw new EntityNotFoundException(account.toEntityKey());
+            throw new AccountNotFoundException(account.getAccountNumber());
         }
 
         return updatedAccount.getEntity();
@@ -69,7 +68,7 @@ public class InMemoryAccountRepository implements AccountRepository {
         PersistedEntity<Account> account = accounts.get(accountNumber);
         if (account == null) {
             LOG.info("Account {} is not found. Nothing to lock", account);
-            throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
+            throw new AccountNotFoundException(accountNumber);
         }
         account.lockForUpdate();
         return accounts.get(accountNumber).getEntity();
@@ -81,7 +80,7 @@ public class InMemoryAccountRepository implements AccountRepository {
         PersistedEntity<Account> persistedEntity = accounts.get(account.getAccountNumber());
         if (persistedEntity == null) {
             LOG.warn("Account {} is not found. Nothing to unlock", account);
-            throw new EntityNotFoundException(account.toEntityKey());
+            throw new AccountNotFoundException(account.getAccountNumber());
         }
         persistedEntity.unlock();
     }
