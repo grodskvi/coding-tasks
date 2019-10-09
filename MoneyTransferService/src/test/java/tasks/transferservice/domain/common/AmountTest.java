@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static tasks.transferservice.domain.common.Amount.ZERO_AMOUNT;
 import static tasks.transferservice.domain.common.Amount.amountOf;
 
 public class AmountTest {
@@ -75,6 +76,15 @@ public class AmountTest {
 
         assertThat(initialAmount.decreaseBy(debit))
                 .isEqualTo(updatedAmount);
+    }
+
+    @Test
+    public void decreasesFullAmount() {
+        Amount initialAmount = amountOf("55.04");
+        Amount debit = amountOf("55.04");
+
+        assertThat(initialAmount.decreaseBy(debit))
+            .isEqualTo(ZERO_AMOUNT);
     }
 
     @Test

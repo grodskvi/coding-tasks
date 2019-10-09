@@ -68,7 +68,7 @@ public class InMemoryAccountRepository implements AccountRepository {
     public Account lockForUpdate(AccountNumber accountNumber) {
         PersistedEntity<Account> account = accounts.get(accountNumber);
         if (account == null) {
-            LOG.warn("Account {} is not found. Nothing to lock", account);
+            LOG.info("Account {} is not found. Nothing to lock", account);
             throw new EntityNotFoundException(Account.toEntityKey(accountNumber));
         }
         account.lockForUpdate();

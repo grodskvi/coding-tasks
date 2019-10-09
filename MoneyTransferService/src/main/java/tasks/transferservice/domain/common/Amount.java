@@ -1,16 +1,15 @@
 package tasks.transferservice.domain.common;
 
-import lombok.EqualsAndHashCode;
+import static java.lang.String.format;
+
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import lombok.Getter;
 import lombok.ToString;
 import tasks.transferservice.validation.Preconditions;
 
-import java.math.BigDecimal;
-import java.util.function.Predicate;
-
-import static java.lang.String.format;
-
-@EqualsAndHashCode
 @ToString
 @Getter
 public class Amount {
@@ -35,13 +34,30 @@ public class Amount {
 
     public Amount decreaseBy(Amount amount) {
         Preconditions.checkNotNull(amount, "Attempted to decrease '%s' amount with null", value);
-        Preconditions.check(this, amount::isLessThen, "Attempted to decrease '%s' by '%s'", value, amount.value);
+        Preconditions.check(this, amount::isLessThenOrEquals, "Attempted to decrease '%s' by '%s'", value, amount.value);
 
         return amountOf(this.value.subtract(amount.value));
     }
 
     public boolean isLessThen(Amount amount) {
         return value.compareTo(amount.value) < 0;
+    }
+
+    public boolean isLessThenOrEquals(Amount amount) {
+        return value.compareTo(amount.value) <= 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        Amount amount = (Amount) o;
+        return value.compareTo(amount.value) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     public static Amount amountOf(String amount) {

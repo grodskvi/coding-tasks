@@ -1,23 +1,31 @@
 package tasks.transferservice.service;
 
+import static java.lang.String.format;
+import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
+import static tasks.transferservice.domain.common.Amount.amountOf;
+import static tasks.transferservice.utils.FlowControlUtils.findFirstMatch;
+import static tasks.transferservice.utils.FlowControlUtils.findFirstNotEqualTo;
+import static tasks.transferservice.utils.ComporatorUtils.maxOf;
+
+import java.util.Objects;
+import java.util.function.BiPredicate;
+
+import javax.inject.Inject;
+
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.exception.InsufficientFundsException;
 import tasks.transferservice.domain.exception.InvalidTransferException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
 import tasks.transferservice.repository.AccountRepository;
 
-import javax.inject.Inject;
-import java.util.Objects;
-
-import static java.lang.String.format;
-import static tasks.transferservice.domain.common.AccountNumber.anAccountNumber;
-import static tasks.transferservice.domain.common.Amount.amountOf;
-
 @Service
 public class DefaultTransferService implements TransferService {
+
+    private static final BiPredicate<String, Account> ACCOUNT_NUMBER_MATCHES = (accountNumber, account) -> account.hasAccountNumberValueOf(accountNumber);
 
     private static Logger LOG = LoggerFactory.getLogger(DefaultTransferService.class);
 
@@ -32,10 +40,10 @@ public class DefaultTransferService implements TransferService {
     public void transfer(ExecuteTransferRequest transferRequest) {
         LOG.info("Processing transfer request {}", transferRequest);
 
-        String accountNumberA = greaterOf(transferRequest.getCreditAccount(), transferRequest.getDebitAccount());
-        String accountNumberB = accountNumberA.equals(transferRequest.getCreditAccount()) ?
-                transferRequest.getDebitAccount() :
-                transferRequest.getCreditAccount();
+        String accountNumberA = maxOf(transferRequest.getCreditAccount(), transferRequest.getDebitAccount());
+        String accountNumberB = findFirstNotEqualTo(accountNumberA,
+            transferRequest.getCreditAccount(),
+            transferRequest.getDebitAccount());
 
         Account accountA = null;
         Account accountB = null;
@@ -46,9 +54,10 @@ public class DefaultTransferService implements TransferService {
             accountB = accountRepository.lockForUpdate(anAccountNumber(accountNumberB));
             checkAccountNotNull(accountB, accountNumberB, transferRequest);
 
-            boolean isAccountACredit = accountA.hasAccountNumberValueOf(transferRequest.getCreditAccount());
-            Account creditAccount = isAccountACredit ? accountA : accountB;
-            Account debitAccount = isAccountACredit ? accountB : accountA;
+            Account creditAccount = findFirstMatch(transferRequest.getCreditAccount(),
+                ACCOUNT_NUMBER_MATCHES, accountA, accountB);
+            Account debitAccount = findFirstMatch(transferRequest.getDebitAccount(),
+                ACCOUNT_NUMBER_MATCHES, accountA, accountB);
 
             doTransfer(creditAccount, debitAccount, transferRequest);
 
@@ -68,10 +77,6 @@ public class DefaultTransferService implements TransferService {
             LOG.info("Account {} does not exist. Can not execute transfer {}", accountNumber, transferRequest);
             throw new InvalidTransferException(transferRequest, format("Account '%s' does not exist", accountNumber));
         }
-    }
-
-    private <T extends Comparable<T>> T greaterOf(T left, T right) {
-        return left.compareTo(right) > 0 ? left : right;
     }
 
     private void doTransfer(Account creditAccount, Account debitAccount, ExecuteTransferRequest transferRequest) throws InsufficientFundsException {
