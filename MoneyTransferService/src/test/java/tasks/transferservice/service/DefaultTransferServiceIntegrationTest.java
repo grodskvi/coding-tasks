@@ -4,13 +4,17 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
 import tasks.transferservice.repository.AccountRepository;
 import tasks.transferservice.repository.InMemoryAccountRepository;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -29,6 +33,8 @@ import static tasks.transferservice.domain.common.Amount.amountOf;
 import static tasks.transferservice.domain.common.Currency.EUR;
 
 public class DefaultTransferServiceIntegrationTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultTransferServiceIntegrationTest.class);
 
     private static final int THREAD_POOL_SIZE = 20;
 
@@ -56,7 +62,7 @@ public class DefaultTransferServiceIntegrationTest {
     }
 
     @Test
-    public void ensuresConsistencyOfTransfersBetweenTwoAccounts() {
+    public void ensuresConsistencyOfTransfersBetweenTwoAccounts() throws DuplicateAccountException {
         Account accountA = Account.anAccount("account_a", EUR);
         Account accountB = Account.anAccount("account_b", EUR);
         Amount initialAmount = amountOf("1000000");
@@ -77,13 +83,16 @@ public class DefaultTransferServiceIntegrationTest {
                     return null;
                 });
 
+        List<Class<? extends Throwable>> executionErrors = new ArrayList<>();
         transferFutures.forEach((future) -> {
             try {
                 future.get();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                LOG.info("Exception occurred during execution", e);
+                executionErrors.add(e.getCause().getClass());
             }
         });
+        LOG.info("Execution errors: {}", executionErrors);
 
         Account updatedAccountA = accountRepository.findByAccountNumber(anAccountNumber("account_a"));
         Account updatedAccountB = accountRepository.findByAccountNumber(anAccountNumber("account_b"));
@@ -99,6 +108,8 @@ public class DefaultTransferServiceIntegrationTest {
                 .isEqualTo(updatedAccountA.getBalance().getValue());
         assertThat(sumAccountOperations(updatedAccountB)).
                 isEqualTo(updatedAccountB.getBalance().getValue());
+
+        assertThat(executionErrors).isEmpty();
     }
 
     private BigDecimal sumAccountOperations(Account account) {

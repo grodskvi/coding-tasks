@@ -15,6 +15,7 @@ import tasks.transferservice.domain.common.Currency;
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.exception.DuplicateAccountException;
+import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 public class InMemoryAccountRepositoryTest {
 
@@ -23,7 +24,7 @@ public class InMemoryAccountRepositoryTest {
     private InMemoryAccountRepository accountRepository = new InMemoryAccountRepository();
 
     @Test
-    public void savesAccount() {
+    public void savesAccount() throws DuplicateAccountException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.save(account);
 
@@ -35,7 +36,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void preventsSavingAccountWithSameAccountNumber() {
+    public void preventsSavingAccountWithSameAccountNumber() throws DuplicateAccountException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.save(account);
 
@@ -65,7 +66,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void ensuresSafePublicationOnSaveOfResult() {
+    public void ensuresSafePublicationOnSaveOfResult() throws DuplicateAccountException {
         Account account = anAccount("1111", Currency.EUR);
         Account savedAccount = accountRepository.save(account);
         savedAccount.credit(amountOf("100"));
@@ -77,7 +78,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void ensuresSafePublicationOnSaveOfParameter() {
+    public void ensuresSafePublicationOnSaveOfParameter() throws DuplicateAccountException {
         Account account = anAccount("1111", Currency.EUR);
 
         accountRepository.save(account);
@@ -90,7 +91,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void ensuresSafePublicationOnFindByAccountNumber() {
+    public void ensuresSafePublicationOnFindByAccountNumber() throws DuplicateAccountException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.save(account);
 
@@ -116,7 +117,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void updatesAccount() {
+    public void updatesAccount() throws AccountNotFoundException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.restoreRepositoryStateFrom(account);
 
@@ -135,15 +136,15 @@ public class InMemoryAccountRepositoryTest {
         account.credit(Amount.amountOf("10"));
 
         assertThatThrownBy(() -> accountRepository.update(account))
-            .isInstanceOf(AccountNotFoundException.class)
-            .hasMessage("Account '1111' does not exist");
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Entity of tasks.transferservice.domain.entity.Account with id 1111 can't be found");
 
         Account retrievedAccount = accountRepository.findByAccountNumber(ACCOUNT_NUMBER);
         assertThat(retrievedAccount).isNull();
     }
 
     @Test
-    public void ensuresSafePublicationOnUpdateOfParameter() {
+    public void ensuresSafePublicationOnUpdateOfParameter() throws AccountNotFoundException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.restoreRepositoryStateFrom(account);
 
@@ -158,7 +159,7 @@ public class InMemoryAccountRepositoryTest {
     }
 
     @Test
-    public void ensuresSafePublicationOnUpdateOfResult() {
+    public void ensuresSafePublicationOnUpdateOfResult() throws AccountNotFoundException {
         Account account = anAccount("1111", Currency.EUR);
         accountRepository.restoreRepositoryStateFrom(account);
 

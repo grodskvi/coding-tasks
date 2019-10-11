@@ -66,7 +66,7 @@ public class DefaultTransferServiceTest {
 
     @Test
     public void raisesExceptionIfDebitAccountDoesNotExist() {
-        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenThrow(new AccountNotFoundException(anAccountNumber("debit_account_number")));
+        when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
@@ -78,7 +78,7 @@ public class DefaultTransferServiceTest {
 
     @Test
     public void raisesExceptionIfCreditAccountDoesNotExist() {
-        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenThrow(new AccountNotFoundException(anAccountNumber("credit_account_number")));
+        when(accountRepository.lockForUpdate(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
         when(accountRepository.findByAccountNumber(CREDIT_ACCOUNT_NUMBER)).thenReturn(null);
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
@@ -89,7 +89,7 @@ public class DefaultTransferServiceTest {
     }
 
     @Test
-    public void raisesExceptionIfAccountsHaveDifferentCurrencies() {
+    public void raisesExceptionIfAccountsHaveDifferentCurrencies() throws AccountNotFoundException {
         Account debitAccount = anAccount(DEBIT_ACCOUNT_NUMBER.getValue(), USD);
         when(accountRepository.lockForUpdate(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
         when(accountRepository.findByAccountNumber(DEBIT_ACCOUNT_NUMBER)).thenReturn(debitAccount);
@@ -102,7 +102,7 @@ public class DefaultTransferServiceTest {
     }
 
     @Test
-    public void raisesExceptionIfDebitAccountsHaveInsufficientFunds() {
+    public void raisesExceptionIfDebitAccountsHaveInsufficientFunds() throws AccountNotFoundException {
 
         assertThatThrownBy(() -> transferService.transfer(transferRequest))
             .isInstanceOf(InvalidTransferException.class)
@@ -112,7 +112,7 @@ public class DefaultTransferServiceTest {
     }
 
     @Test
-    public void completesValidTransfer() {
+    public void completesValidTransfer() throws AccountNotFoundException, InvalidTransferException {
         debitAccount.credit(amountOf("30"));
 
         transferService.transfer(transferRequest);

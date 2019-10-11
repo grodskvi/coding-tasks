@@ -2,6 +2,7 @@ package tasks.transferservice.rest.resources;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tasks.transferservice.domain.exception.InvalidTransferException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
 import tasks.transferservice.domain.rest.ExecuteTransferResponse;
 import tasks.transferservice.service.TransferService;
@@ -21,7 +22,7 @@ public class TransferResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ExecuteTransferResponse executeTransfer(ExecuteTransferRequest transferRequest) {
+    public ExecuteTransferResponse executeTransfer(ExecuteTransferRequest transferRequest) throws InvalidTransferException {
         LOG.info("Received request {}", transferRequest);
 
         //TODO: add request validation

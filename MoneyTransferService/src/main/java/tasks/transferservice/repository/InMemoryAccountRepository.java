@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.exception.DuplicateAccountException;
+import tasks.transferservice.repository.exception.EntityNotFoundException;
 
 @Service
 public class InMemoryAccountRepository implements AccountRepository {
@@ -27,7 +27,7 @@ public class InMemoryAccountRepository implements AccountRepository {
     private ConcurrentHashMap<AccountNumber, PersistedEntity<Account>> accounts = new ConcurrentHashMap<>();
 
     @Override
-    public Account save(Account account) {
+    public Account save(Account account) throws DuplicateAccountException {
         LOG.debug("Saving account {}", account);
         AccountNumber accountNumber = account.getAccountNumber();
         PersistedEntity<Account> persistedAccount = persistedEntity(account, ACCOUNT_PERSISTENCE_VIEW);
@@ -51,7 +51,7 @@ public class InMemoryAccountRepository implements AccountRepository {
 
         if (updatedAccount == null) {
             LOG.info("Attempting to update non-existing account {}", account.getAccountNumber());
-            throw new AccountNotFoundException(account.getAccountNumber());
+            throw new EntityNotFoundException(account.getEntityId(), Account.class);
         }
 
         return updatedAccount.getEntity();
@@ -67,20 +67,25 @@ public class InMemoryAccountRepository implements AccountRepository {
     public Account lockForUpdate(AccountNumber accountNumber) {
         PersistedEntity<Account> account = accounts.get(accountNumber);
         if (account == null) {
-            LOG.info("Account {} is not found. Nothing to lock", account);
-            throw new AccountNotFoundException(accountNumber);
+            LOG.info("Account {} is not found. Nothing to lock", accountNumber);
+            return null;
         }
+
         account.lockForUpdate();
         return accounts.get(accountNumber).getEntity();
     }
 
     @Override
     public void unlock(Account account) {
+        if (account == null) {
+            LOG.warn("Attempted to unlock null account");
+            return;
+        }
         LOG.debug("Unlocking account {}", account.getAccountNumber());
         PersistedEntity<Account> persistedEntity = accounts.get(account.getAccountNumber());
         if (persistedEntity == null) {
             LOG.warn("Account {} is not found. Nothing to unlock", account);
-            throw new AccountNotFoundException(account.getAccountNumber());
+            return;
         }
         persistedEntity.unlock();
     }

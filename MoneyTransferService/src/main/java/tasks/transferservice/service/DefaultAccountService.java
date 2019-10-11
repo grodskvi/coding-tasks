@@ -13,6 +13,7 @@ import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.common.Amount;
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.DepositRequest;
 import tasks.transferservice.repository.AccountRepository;
@@ -30,7 +31,7 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public Account createAccount(CreateAccountRequest createAccountRequest) {
+    public Account createAccount(CreateAccountRequest createAccountRequest) throws DuplicateAccountException {
         LOG.debug("Creating account according to request {}", createAccountRequest);
 
         Account account = anAccount(
@@ -44,7 +45,7 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public void deposit(AccountNumber accountNumber, DepositRequest depositRequest) {
+    public void deposit(AccountNumber accountNumber, DepositRequest depositRequest) throws AccountNotFoundException {
         LOG.debug("Handling {} for account {}", depositRequest, accountNumber);
         Account account = null;
         try {
@@ -65,7 +66,7 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public Account getAccount(AccountNumber accountNumber) {
+    public Account getAccount(AccountNumber accountNumber) throws AccountNotFoundException {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account == null) {
             LOG.info("Can not find account by {}", accountNumber);

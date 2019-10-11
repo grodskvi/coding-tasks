@@ -72,7 +72,7 @@ public class DefaultAccountServiceIntegrationTest {
     }
 
     @Test
-    public void ensuresAllDepositsSumsUp() {
+    public void ensuresAllDepositsSumsUp() throws DuplicateAccountException {
         AccountNumber accountNumber = AccountNumber.anAccountNumber("1");
         accountRepository.save(anAccount(accountNumber.getValue(), EUR));
 
@@ -131,7 +131,6 @@ public class DefaultAccountServiceIntegrationTest {
     }
 }
 
-@Getter
 class FutureSuiteResult<T> {
    private List<T> items;
     private List<Throwable> errors;
@@ -139,6 +138,14 @@ class FutureSuiteResult<T> {
     private FutureSuiteResult(List<T> items, List<Throwable> errors) {
         this.items = items;
         this.errors = errors;
+    }
+
+    List<T> getItems() {
+        return items;
+    }
+
+    List<Throwable> getErrors() {
+        return errors;
     }
 
     static <T> FutureSuiteResult<T> futureSuite(Collection<Future<T>> futures) {

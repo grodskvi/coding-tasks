@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import tasks.transferservice.domain.common.AccountNumber;
 
-public class AccountNotFoundException extends RuntimeException {
+public class AccountNotFoundException extends Exception {
     private AccountNumber accountNumber;
 
     public AccountNotFoundException(AccountNumber accountNumber) {

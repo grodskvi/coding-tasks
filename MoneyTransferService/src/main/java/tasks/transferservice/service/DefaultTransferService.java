@@ -16,8 +16,8 @@ import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
-import tasks.transferservice.domain.exception.AccountNotFoundException;
 import tasks.transferservice.domain.exception.InsufficientFundsException;
 import tasks.transferservice.domain.exception.InvalidTransferException;
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
@@ -38,7 +38,7 @@ public class DefaultTransferService implements TransferService {
     }
 
     @Override
-    public void transfer(ExecuteTransferRequest transferRequest) {
+    public void transfer(ExecuteTransferRequest transferRequest) throws InvalidTransferException {
         LOG.info("Processing transfer request {}", transferRequest);
 
         String accountNumberA = maxOf(transferRequest.getCreditAccount(), transferRequest.getDebitAccount());
@@ -49,8 +49,8 @@ public class DefaultTransferService implements TransferService {
         Account accountA = null;
         Account accountB = null;
         try {
-            accountA = accountRepository.lockForUpdate(anAccountNumber(accountNumberA));
-            accountB = accountRepository.lockForUpdate(anAccountNumber(accountNumberB));
+            accountA = lockAndCheckAccount(transferRequest, anAccountNumber(accountNumberA));
+            accountB = lockAndCheckAccount(transferRequest, anAccountNumber(accountNumberB));
 
             Account creditAccount = findFirstMatch(transferRequest.getCreditAccount(),
                 ACCOUNT_NUMBER_MATCHES, accountA, accountB);
@@ -64,16 +64,25 @@ public class DefaultTransferService implements TransferService {
         } catch (InsufficientFundsException e) {
             LOG.info("Debit account does not have enough funds to complete transfer {}", transferRequest, e);
             throw new InvalidTransferException(transferRequest, "Debit account does not have enough funds to complete transfer");
-        } catch (AccountNotFoundException e) {
-            LOG.info("Can not execute transfer {}: {}", transferRequest, e.getMessage());
-            throw new InvalidTransferException(transferRequest, format("Can not execute transfer %s. %s", transferRequest.getTransferRequestId(), e.getMessage()));
         } finally {
             accountRepository.unlock(accountB);
             accountRepository.unlock(accountA);
         }
     }
 
-    private void doTransfer(Account creditAccount, Account debitAccount, ExecuteTransferRequest transferRequest) throws InsufficientFundsException {
+    private Account lockAndCheckAccount(ExecuteTransferRequest transferRequest, AccountNumber accountNumber) throws InvalidTransferException {
+        Account account = accountRepository.lockForUpdate(accountNumber);
+        if (account == null) {
+            String message = format(
+                    "Can not execute transfer %s. Account '%s' does not exist",
+                    transferRequest.getTransferRequestId(),
+                    accountNumber.getValue());
+            throw new InvalidTransferException(transferRequest, message);
+        }
+        return account;
+    }
+
+    private void doTransfer(Account creditAccount, Account debitAccount, ExecuteTransferRequest transferRequest) throws InsufficientFundsException, InvalidTransferException {
         if (!Objects.equals(creditAccount.getAccountCurrency(), debitAccount.getAccountCurrency())) {
             LOG.info("Accounts {} and {} have different currencies: {} and {}",
                     creditAccount.getAccountNumber(), debitAccount.getAccountNumber(), creditAccount.getAccountCurrency(), debitAccount.getAccountCurrency());

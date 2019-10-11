@@ -44,6 +44,10 @@ public class Account implements Cloneable {
         return accountNumber;
     }
 
+    public String getEntityId() {
+        return accountNumber.getValue();
+    }
+
     public boolean hasAccountNumberValueOf(String accountNumber) {
         String accountNumberValue = this.accountNumber.getValue();
         return accountNumberValue.equals(accountNumber);

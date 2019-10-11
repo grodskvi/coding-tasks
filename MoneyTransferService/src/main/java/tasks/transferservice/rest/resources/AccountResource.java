@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 import tasks.transferservice.domain.exception.InputDataValidationException;
 import tasks.transferservice.domain.rest.AccountBalanceResponse;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
@@ -44,7 +46,7 @@ public class AccountResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CreateAccountResponse createAccount(CreateAccountRequest request) {
+    public CreateAccountResponse createAccount(CreateAccountRequest request) throws DuplicateAccountException {
         LOG.debug("Received request to create account {}", request);
 
         List<String> errors = createAccountRequestValidator.validate(request);
@@ -67,7 +69,7 @@ public class AccountResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{accountNumber}/balance")
-    public AccountBalanceResponse getBalance(@PathParam("accountNumber") String accountNumber) {
+    public AccountBalanceResponse getBalance(@PathParam("accountNumber") String accountNumber) throws AccountNotFoundException {
         LOG.debug("Checking balance for {}", accountNumber);
         Account account = accountService.getAccount(anAccountNumber(accountNumber));
         return new AccountBalanceResponse(account.getBalance().getValue());
@@ -77,7 +79,7 @@ public class AccountResource {
     @Path("{accountNumber}/deposit")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public DepositResponse deposit(@PathParam("accountNumber") String accountNumber, DepositRequest depositRequest) {
+    public DepositResponse deposit(@PathParam("accountNumber") String accountNumber, DepositRequest depositRequest) throws AccountNotFoundException {
         List<String> errors = depositRequestValidator.validate(accountNumber, depositRequest);
         if (!errors.isEmpty()) {
             LOG.info("Validation of depositRequest {} failed with errors: {}", depositRequest, errors);

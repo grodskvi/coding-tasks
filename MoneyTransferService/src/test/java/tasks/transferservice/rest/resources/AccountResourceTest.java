@@ -19,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import tasks.transferservice.domain.entity.Account;
+import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 import tasks.transferservice.domain.exception.InputDataValidationException;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.CreateAccountResponse;
@@ -51,7 +53,7 @@ public class AccountResourceTest {
     }
 
     @Test
-    public void handlesCreateAccountRequest() {
+    public void handlesCreateAccountRequest() throws DuplicateAccountException {
         CreateAccountRequest request = new CreateAccountRequest("request_id", "1111", "EUR");
         when(createAccountRequestValidator.validate(request)).thenReturn(emptyList());
 
@@ -63,7 +65,7 @@ public class AccountResourceTest {
     }
 
     @Test
-    public void handlesDeposit() {
+    public void handlesDeposit() throws AccountNotFoundException {
         DepositRequest request = new DepositRequest("request_id", BigDecimal.TEN);
         DepositResponse response = accountResource.deposit("account_id", request);
 

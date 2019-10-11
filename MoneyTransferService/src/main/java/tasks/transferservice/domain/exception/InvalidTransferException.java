@@ -2,7 +2,7 @@ package tasks.transferservice.domain.exception;
 
 import tasks.transferservice.domain.rest.ExecuteTransferRequest;
 
-public class InvalidTransferException extends RuntimeException {
+public class InvalidTransferException extends Exception {
     private ExecuteTransferRequest source;
 
     public InvalidTransferException(ExecuteTransferRequest source, String message) {

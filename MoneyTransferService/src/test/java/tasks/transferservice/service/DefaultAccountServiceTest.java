@@ -24,6 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import tasks.transferservice.domain.common.AccountNumber;
 import tasks.transferservice.domain.entity.Account;
 import tasks.transferservice.domain.exception.AccountNotFoundException;
+import tasks.transferservice.domain.exception.DuplicateAccountException;
 import tasks.transferservice.domain.rest.CreateAccountRequest;
 import tasks.transferservice.domain.rest.DepositRequest;
 import tasks.transferservice.repository.AccountRepository;
@@ -38,7 +39,7 @@ public class DefaultAccountServiceTest {
     private DefaultAccountService accountService;
 
     @Test
-    public void createsAccountByRequest() {
+    public void createsAccountByRequest() throws DuplicateAccountException {
         CreateAccountRequest request = new CreateAccountRequest("request_id", "1111-2222", "EUR");
 
         when(accountRepository.save(any(Account.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
@@ -50,7 +51,7 @@ public class DefaultAccountServiceTest {
     }
 
     @Test
-    public void depositsAccount() {
+    public void depositsAccount() throws AccountNotFoundException {
         AccountNumber accountNumber = anAccountNumber("1111-2222");
         BigDecimal depositAmount = BigDecimal.valueOf(100);
         DepositRequest depositRequest = new DepositRequest("request_id", depositAmount);
@@ -69,7 +70,7 @@ public class DefaultAccountServiceTest {
     }
 
     @Test
-    public void failsToDepositNotExistingAccount() {
+    public void failsToDepositNotExistingAccount() throws AccountNotFoundException {
         AccountNumber accountNumber = anAccountNumber("1111-2222");
         BigDecimal depositAmount = BigDecimal.valueOf(100);
         DepositRequest depositRequest = new DepositRequest("request_id", depositAmount);
